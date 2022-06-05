@@ -64,49 +64,6 @@ class Utils
         DB::alteration_message('Completed, pruned ' . $total . ' records');
     }
 
-    /**
-     * Prune versions of deleted files/folders
-     *
-     * @return HTTPResponse
-     */
-    private function _pruneDeletedFileVersions()
-    {
-        DB::alteration_message('Pruning all deleted File DataObjects');
-
-        $query = new SQLSelect();
-        $query->setSelect(['RecordID']);
-        $query->setFrom('File_Versions');
-        $query->addWhere(
-            [
-                '"WasDeleted" = ?' => 1,
-            ]
-        );
-
-        $to_delete = [];
-
-        $results = $query->execute();
-
-        foreach ($results as $result) {
-            array_push($to_delete, $result['RecordID']);
-        }
-
-        if (!count($to_delete)) {
-            DB::alteration_message('Completed, pruned 0 File records');
-
-            return;
-        }
-
-        $deleteSQL = sprintf(
-            'DELETE FROM File_Versions WHERE "RecordID" IN (%s)',
-            implode(',', $to_delete)
-        );
-
-        DB::query($deleteSQL);
-
-        $deleted = DB::affected_rows();
-
-        DB::alteration_message('Completed, pruned ' . $deleted . ' File records');
-    }
 
     /**
      * Delete all previous records of published records
@@ -147,24 +104,6 @@ class Utils
         DB::alteration_message('Completed, pruned ' . $total . ' records');
 
         $this->_pruneDeletedFileVersions();
-    }
-
-    /**
-     * Get all versioned database classes
-     *
-     * @return array
-     */
-    private function _getAllVersionedDataClasses()
-    {
-        $all_classes       = ClassInfo::subclassesFor(DataObject::class);
-        $versioned_classes = [];
-        foreach ($all_classes as $c) {
-            if (DataObject::has_extension($c, Versioned::class)) {
-                array_push($versioned_classes, $c);
-            }
-        }
-
-        return array_reverse($versioned_classes);
     }
 
 

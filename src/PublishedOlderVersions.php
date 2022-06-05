@@ -1,5 +1,8 @@
 <?php
-namespace Sunnysideup\VersionPruner;
+namespace Sunnysideup\VersionPruner\Templates;
+
+use Sunnysideup\VersionPruner\TruncateTemplate;
+
 
 use SilverStripe\Core\Config\Config;
 use SilverStripe\ORM\DataExtension;
@@ -16,19 +19,18 @@ use SilverStripe\Control\Director;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Dev\BuildTask;
 
-
-class ExceptionPatternBaseClass
+class PublishedOlderVersions extends TruncateTemplate
 {
 
-    protected $object = null;
 
-    protected $baseTable = '';
+    private static $keep_versions = 50;
 
-    protected $toDelete = [];
 
-    public function __construct($object)
+    protected function run()
     {
-        $this->object = $object;
+
+
     }
+
 
 }
