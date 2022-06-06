@@ -75,11 +75,14 @@ class RunForOneObject
         $this->object = $object;
     }
 
+    protected $verbose = false;
+
     /**
      * returns the total number deleted.
      */
-    public function run(): int
+    public function run(?bool $verbose = false): int
     {
+        $this->verbose = $verbose;
         if (false === $this->hasStages()) {
             return 0;
         }
@@ -98,6 +101,9 @@ class RunForOneObject
         $myTemplates = $templates[$this->object->ClassName] ?? $templates['default'];
         foreach ($myTemplates as $className => $options) {
             $runner = new $className($this->object, $this->toDelete[$this->getUniqueKey()]);
+            if($this->verbose) {
+                DB::alteration_message('Running '.$runner->getTitle().': '.$runner->getDescription());
+            }
             foreach ($options as $key => $value) {
                 $method = 'set' . $key;
                 $runner->{$method}($value);

@@ -9,26 +9,29 @@ class BasedOnTimeScale extends PruningTemplatesTemplate
     protected $timeScale = [
         'Minutes' => [
             'Max' => 60,
-            'Interval' => 5,
+            'Interval' => 15,
         ],
         'Hours' => [
             'Max' => 24,
-            'Interval' => 2,
+            'Interval' => 3,
         ],
         'Days' => [
-            'Max' => 24,
-            'Interval' => 7,
+            'Min' => 1,
+            'Max' => 7,
+            'Interval' => 1,
         ],
         'Weeks' => [
-            'Min' => 4,
+            'Min' => 1,
             'Max' => 4,
-            'Interval' => 2,
+            'Interval' => 1,
         ],
         'Months' => [
-            'Max' => 18,
+            'Min' => 1,
+            'Max' => 12,
             'Interval' => 1,
         ],
         'Years' => [
+            'Min' => 1,
             'Max' => 7,
             'Interval' => 1,
         ],
@@ -87,6 +90,7 @@ class BasedOnTimeScale extends PruningTemplatesTemplate
                             TIMESTAMP(' . date('Y-m-d h:i:s', $fromTs) . ')
                             AND TIMESTAMP(' . date('Y-m-d h:i:s', $untilTs) . ')
                     )';
+                echo $where;
                 $query = $this->getBaseQuery()
                     ->addWhere($this->normaliseWhere([$where] + $this->otherFilters))
                     ->setLimit(1)

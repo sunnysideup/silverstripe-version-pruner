@@ -43,13 +43,12 @@ class PruneAllVersionedRecords extends BuildTask
 
             foreach ($objects as $object) {
                 // check if stages are present
-                $totalDeleted = (new RunForOneObject($object))->run();
+                DB::alteration_message('... ... Checking #ID: ' . $object->ID);
+                $totalDeleted += (new RunForOneObject($object))->run();
             }
 
             if ($totalDeleted > 0) {
-                DB::alteration_message(
-                    '... Deleted ' . $totalDeleted . ' versioned ' . $className . ' records'
-                );
+                DB::alteration_message('... ... Deleted ' . $totalDeleted . ' records');
 
                 $totalTotalDeleted += $totalDeleted;
             }
@@ -67,10 +66,21 @@ class PruneAllVersionedRecords extends BuildTask
         $versionedClasses = [];
         foreach ($allClasses as $className) {
             if (DataObject::has_extension($className, Versioned::class)) {
+                $ancestors = ClassInfo::ancestry($className);
+                foreach($ancestors as $classNameInner) {
+                    if (DataObject::has_extension($classNameInner, Versioned::class)) {
+                        $versionedClasses[$classNameInner] = $classNameInner;
+                        continue 2;
+                    }
+                }
                 $versionedClasses[$className] = $className;
+
             }
+
         }
 
-        return array_reverse($versionedClasses);
+        return $versionedClasses;
     }
+
+
 }
