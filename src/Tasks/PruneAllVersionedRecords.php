@@ -21,7 +21,7 @@ class PruneAllVersionedRecords extends BuildTask
     /**
      * @var string
      */
-    private static $segment = 'prunes-all-versioned-records';
+    private static $segment = 'prune-all-versioned-records';
 
     /**
      * Prune all published DataObjects which are published according to config.
