@@ -23,14 +23,44 @@ class BasedOnTimeScale extends PruningTemplatesTemplate
 {
 
     protected $timeScale = [
-        'Minutes' => 15,
-        'Hours' => 12,
-        'Days' => 7,
-        'Weeks' => 12,
-        'Months' => 24,
-        'Years' => 7,
+        'Minutes' => [
+            'Max' => 60,
+            'Interval' => 5,
+        ],
+        'Hours' => [
+            'Max' => 24,
+            'Interval' => 2,
+        ],
+        'Days' => [
+            'Max' => 24,
+            'Interval' => 7,
+        ],
+        'Weeks' => [
+            'Min' => 4,
+            'Max' => 4,
+            'Interval' => 2,
+        ],
+        'Months' => [
+            'Max' => 18,
+            'Interval' => 1,
+        ],
+        'Years' => [
+            'Max' => 7,
+            'Interval' => 1,
+        ],
     ];
 
+    protected $otherFilters = [
+        '"WasPublished" = ?'                   => 1,
+    ];
+
+
+    public function setOtherFilters(array $otherFilters) : self
+    {
+        $this->otherFilters = $otherFilters;
+
+        return $this;
+    }
 
     public function setTimeScale(array $timeScale) : self
     {
@@ -41,50 +71,60 @@ class BasedOnTimeScale extends PruningTemplatesTemplate
 
     public function run()
     {
-        $query = $this->getBaseQuery($this->fieldsWithChangesToKeep);
-        $orFilterKey = '"'.implode('" != ? OR "', $this->fieldsWithChangesToKeep).'" != ?';
-        $orFilterValuesArray = [];
-        foreach($this->fieldsWithChangesToKeep as $field) {
-            $orFilterValuesArray[] = $this->object->{$field};
-        }
-
+        $keep = $this->buildTimeScalePatternAndOnesToKeep();
 
         $query->addWhere(
             [
                 '"RecordID" = ?'                       => $this->object->ID,
-                '"WasPublished" = ?'                   => 1,
                 '"Version" NOT IN (' . implode(',', $toKeep) . ')',
-                $orFilterKey                           => $orFilterValuesArray,
-            ]
+            ] +
+            $this->otherFilters
         );
 
         $results = $query->execute();
 
-        $changedRecords = [];
-
-        // create a `ParentID - $URLSegment` array to keep only a single
-        // version of each for URL redirection
-        foreach ($results as $result) {
-            $keyArray[] = [];
-            foreach($this->fieldsWithChangesToKeep as $field) {
-                $keyArray[] = $result[$field];
-            }
-            $key = implode('_', $keyArray);
-
-            if (! (in_array($key, $changedRecords))) {
-                //mark the first one, but do not mark it to delete
-                array_push($changedRecords, $key);
-            } else {
-                // the first one has been done, so we can delete others...
-                $this->toDelete[$this->getUniqueKey()][$result['Version']] = $result['Version'];
-            }
-        }
+        $this->toDelete[$this->getUniqueKey()] = $this->addVersionNumberToArray(
+            $this->toDelete[$this->getUniqueKey()],
+            $query->execute()
+        );
     }
 
 
-    protected function buildTimeScalePattern()
+    protected function buildTimeScalePatternAndOnesToKeep() : array
     {
+        $keep = [];
+        foreach($this->timeScale as $name => $options) {
+            $min = $options['Min'] ?? 0;
+            $max = $options['Max'] ?? 7;
+            $interval = (int) $options['Interval'] ?? 1;
+            for($i = $min; $i < $max; $i = $i + $interval) {
+                $untilTs = strtotime('-'.$i.' '.$name);
+                $fromTs = strtotime('-'.($i + $interval).' '.$name);
+                $where =
+                    '(
+                        "LastEdited" BETWEEN
+                            TIMESTAMP('.date('Y-m-d h:i:s', $fromTs).')
+                            AND TIMESTAMP('.date('Y-m-d h:i:s', $untilTs).')
+                    )';
+                $query = $this->getBaseQuery();
+                $query->addWhere(
+                    [
+                        'RecordID = ' . $this->object->ID,
+                        $where
+                    ] +
+                    $this->otherFilters
+                );
 
+                //todo: check limit!
+                $query->setLimit(1);
+
+                $keep = $this->addVersionNumberToArray(
+                    $keep,
+                    $query->execute()
+                );
+            }
+        }
+        return $keep;
     }
 
 
