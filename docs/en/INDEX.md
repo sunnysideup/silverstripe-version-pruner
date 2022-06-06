@@ -4,12 +4,18 @@ Many thanks for Ralph: https://github.com/axllent/silverstripe-version-truncator
 
 # how to configre?
 
-see: https://github.com/sunnysideup/silverstripe-version-pruner/edit/master/_config/version-pruner.yml.example for an example.
+See: https://github.com/sunnysideup/silverstripe-version-pruner/edit/master/_config/version-pruner.yml.example for an example.
 
 # how to run
 
+Run all the pruning in one go using this command on the command line:
+
+```
 vendor/bin/sake dev/tasks/prunes-all-versioned-records
+```
 
-OR - if you have to ...
+OR browse to (not recommended):
 
+```
 http://www.mysite.com.nz/dev/tasks/prunes-all-versioned-records
+```
