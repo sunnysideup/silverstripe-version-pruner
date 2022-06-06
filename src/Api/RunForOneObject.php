@@ -9,6 +9,8 @@ use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DB;
 use SilverStripe\Versioned\Versioned;
+
+use SilverStripe\Assets\File;
 use Sunnysideup\VersionPruner\PruningTemplates\BasedOnTimeScale;
 use Sunnysideup\VersionPruner\PruningTemplates\DeleteFiles;
 use Sunnysideup\VersionPruner\PruningTemplates\Drafts;
@@ -18,14 +20,25 @@ class RunForOneObject
 {
     use Configurable;
     use Injectable;
-    public $Object;
 
+
+    /**
+     * Versioned DataObject.
+     *
+     * @var DataObject
+     */
     protected $object;
 
-    protected $baseTable = '';
-
+    /**
+     * array of Version numbers to delete.
+     * @var string
+     */
     protected $toDelete = [];
 
+    /**
+     * list of tables to delete per class name.
+     * @var array
+     */
     protected static $tables_per_class_name = [];
 
     /**
@@ -82,16 +95,16 @@ class RunForOneObject
         $totalDeleted = 0;
 
         $templates = $this->Config()->get('templates');
-        $myTemlates = $templates[$this->object->ClassName] ?? $templates['default'];
+        $myTemplates = $templates[$this->object->ClassName] ?? $templates['default'];
         foreach ($myTemplates as $className => $options) {
-            $obj = new $className($this->object, $this->toDelete[$this->getUniqueKey()]);
+            $runner = new $className($this->object, $this->toDelete[$this->getUniqueKey()]);
             foreach ($options as $key => $value) {
                 $method = 'set' . $key;
-                $obj->{$method}($value);
+                $runner->{$method}($value);
             }
 
-            $obj->run();
-            $this->toDelete[$this->getUniqueKey()] = $obj->getToDelete();
+            $runner->run();
+            $this->toDelete[$this->getUniqueKey()] = $runner->getToDelete();
         }
 
         if (! count($this->toDelete[$this->getUniqueKey()])) {
@@ -121,7 +134,7 @@ class RunForOneObject
      */
     protected function getUniqueKey(): string
     {
-        return $this->object->ClassName . '_' . $this->Object->ID;
+        return $this->object->ClassName . '_' . $this->object->ID;
     }
 
     protected function hasStages(): bool
