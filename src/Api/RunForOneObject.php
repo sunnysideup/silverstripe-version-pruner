@@ -89,7 +89,6 @@ class RunForOneObject
             return 0;
         }
 
-        echo 'B';
         if (false === $this->object->isLiveVersion()) {
             if($this->verbose) {
                 DB::alteration_message('... ... ... Error, not a live version', 'deleted');
