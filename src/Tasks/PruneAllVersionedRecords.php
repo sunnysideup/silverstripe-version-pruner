@@ -17,48 +17,56 @@ use SilverStripe\Control\Director;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Dev\BuildTask;
 
+use Sunnysideup\VersionPruner\Api\RunForOneObject;
+
 
 class PruneAllVersionedRecords extends BuildTask
 {
+
+    /**
+     * @var string
+     */
+    protected $title = 'Prune all versioned records';
+
+    protected $description = 'Go through all dataobjects that are versioned and prune them as per schema provided.';
+
+    /**
+     * @var string
+     */
+    private static $segment = 'prunes-all-versioned-records';
 
     /**
      * Prune all published DataObjects which are published according to config
      *
      * @return void
      */
-    private function run($request)
+    public function run($request)
     {
         $classes = $this->getAllVersionedDataClasses();
 
         DB::alteration_message('Pruning all DataObjects');
 
-        $total = 0;
+        $totalTotalDeleted = 0;
 
-        foreach ($classes as $class) {
-            $records = Versioned::get_by_stage($class, Versioned::DRAFT);
-            $deleted = 0;
+        foreach ($classes as $className) {
+            $objects = Versioned::get_by_stage($className, Versioned::DRAFT);
+            $totalDeleted = 0;
 
-            foreach ($records as $r) {
+            foreach ($objects as $object) {
                 // check if stages are present
-                if (!$r->hasStages()) {
-                    continue;
-                }
-
-                if ($r->isLiveVersion()) {
-                    $deleted += $r->doVersionCleanup();
-                }
+                $totalDeleted = (new RunForOneObject($object))->run();
             }
 
-            if ($deleted > 0) {
+            if ($totalDeleted > 0) {
                 DB::alteration_message(
-                    'Deleted ' . $deleted . ' versioned ' . $class . ' records'
+                    'Deleted ' . $totalDeleted . ' versioned ' . $className . ' records'
                 );
 
-                $total += $deleted;
+                $totalTotalDeleted += $totalDeleted;
             }
         }
 
-        DB::alteration_message('Completed, pruned ' . $total . ' records');
+        DB::alteration_message('Completed, pruned ' . $totalTotalDeleted . ' records');
     }
 
     /**
@@ -78,3 +86,4 @@ class PruneAllVersionedRecords extends BuildTask
 
         return array_reverse($versionedClasses);
     }
+}

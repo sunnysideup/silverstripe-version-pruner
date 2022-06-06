@@ -1,7 +1,13 @@
 <?php
 
 namespace Sunnysideup\VersionPruner\Api;
-
+use Sunnysideup\VersionPruner\PruningTemplates\BasedOnTimeScale;
+use Sunnysideup\VersionPruner\PruningTemplates\DeleteFiles;
+use Sunnysideup\VersionPruner\PruningTemplates\Drafts;
+use Sunnysideup\VersionPruner\PruningTemplates\SiteTreeVersioningTemplate;
+use SilverStripe\Core\Config\Configurable;
+use SilverStripe\Core\Injector\Injectable;
+use SilverStripe\Core\Injector\Injector;
 use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataObject;
@@ -10,6 +16,10 @@ use SilverStripe\Versioned\Versioned;
 
 class RunForOneObject
 {
+
+    use Configurable;
+    use Injectable;
+
     protected $object;
 
     protected $baseTable = '';
@@ -55,7 +65,7 @@ class RunForOneObject
     /**
      * returns the total number deleted.
      */
-    public function doVersionCleanup(): int
+    public function run(): int
     {
         if (false === $this->hasStages()) {
             return 0;
@@ -64,8 +74,6 @@ class RunForOneObject
         if (false === $this->object->isLiveVersion()) {
             return 0;
         }
-
-        $this->setStage();
 
         // array of version IDs to delete
         $this->toDelete[$this->getUniqueKey()] = [];
@@ -85,7 +93,7 @@ class RunForOneObject
             $this->toDelete[$this->getUniqueKey()] = $obj->getToDelete();
         }
         if (! count($this->toDelete[$this->getUniqueKey()])) {
-            return;
+            return 0;
         }
 
         // Ugly (borrowed from DataObject::class), but returns all

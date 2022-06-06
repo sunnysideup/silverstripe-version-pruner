@@ -62,7 +62,7 @@ abstract class PruningTemplatesTemplate
 
     protected function addVersionNumberToArray(array $array, $records, ?string $field = 'Version'): array
     {
-        foreach ($record as $record) {
+        foreach ($records as $record) {
             $array[$record[$field]] = $record[$field];
         }
 
