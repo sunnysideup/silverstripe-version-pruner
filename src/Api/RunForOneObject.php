@@ -5,6 +5,7 @@ namespace Sunnysideup\VersionPruner\Api;
 use SilverStripe\Assets\File;
 use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Core\Config\Configurable;
+use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Core\Injector\Injectable;
 use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataObject;
@@ -35,20 +36,39 @@ class RunForOneObject
     protected $toDelete = [];
 
     /**
+     * reversed list of templates (most specific first)
+     * @var array
+     */
+    protected $templatesAvailable = [];
+
+    /**
      * list of tables to delete per class name.
      *
      * @var array
      */
-    protected static $tables_per_class_name = [];
+    protected $tablesPerClassName = [];
 
     /**
      * list of templates per class name.
      *
      * @var array
      */
-    protected static $templates_per_class_name = [];
+    protected static $templatesPerClassName = [];
 
     protected $verbose = false;
+
+    public static function inst()
+    {
+        return Injector::inst()->get(static::class);
+    }
+
+    public function __construct()
+    {
+        $this->templatesAvailable = array_reverse(
+            $this->Config()->get('templates'),
+            true //important - to preserve keys!
+        );
+    }
 
     /**
      * schema is:
@@ -62,6 +82,7 @@ class RunForOneObject
      *         ],
      *     ]
      * ```.
+     * N.B. least specific first!
      *
      * @var array
      */
@@ -185,33 +206,32 @@ class RunForOneObject
 
     protected function findBestSuitedTemplates()
     {
-        if (empty(self::$templates_per_class_name[$this->object->ClassName])) {
-            $templates = $this->Config()->get('templates');
-            foreach ($templates as $className => $classesWithOptions) {
-                if ($this->object instanceof $className) {
-                    self::$templates_per_class_name[$this->object->ClassName] = $classesWithOptions;
-
-                    return $classesWithOptions;
+        if (empty($this->templatesPerClassName[$this->object->ClassName])) {
+            foreach ($this->templatesAvailable as $className => $classesWithOptions) {
+                if (is_a($this->object, $className)) {
+                    $this->templatesPerClassName[$this->object->ClassName] = $classesWithOptions;
+                    break;
                 }
             }
-
-            self::$templates_per_class_name[$this->object->ClassName] = $templates['default'];
+            if(! isset($this->templatesPerClassName[$this->object->ClassName])) {
+                $this->templatesPerClassName[$this->object->ClassName] = $templates['default'] ?? $classesWithOptions;
+            }
         }
 
-        return self::$templates_per_class_name[$this->object->ClassName];
+        return $this->templatesPerClassName[$this->object->ClassName];
     }
 
     protected function getTablesForClassName(): array
     {
-        if (empty(self::$tables_per_class_name[$this->object->ClassName])) {
+        if (empty($this->tablesPerClassName[$this->object->ClassName])) {
             $srcQuery = DataList::create($this->object->ClassName)
                 ->filter('ID', $this->object->ID)
                 ->dataQuery()
                 ->query()
             ;
-            self::$tables_per_class_name[$this->object->ClassName] = $srcQuery->queriedTables();
+            $this->tablesPerClassName[$this->object->ClassName] = $srcQuery->queriedTables();
         }
 
-        return self::$tables_per_class_name[$this->object->ClassName];
+        return $this->tablesPerClassName[$this->object->ClassName];
     }
 }
