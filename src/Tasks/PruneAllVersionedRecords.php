@@ -86,7 +86,7 @@ class PruneAllVersionedRecords extends BuildTask
     protected function getObjectsPerClassName(string $className) : DataList
     {
         return Versioned::get_by_stage($className, Versioned::DRAFT)
-            ->sort(DB::get_conn()->random())
+            ->sort(DB::get_conn()->random(). ' ASC')
             ->limit(self::MAX_ITEMS_PER_CLASS);
     }
 

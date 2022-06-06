@@ -6,7 +6,7 @@ use Sunnysideup\VersionPruner\PruningTemplatesTemplate;
 
 class Drafts extends PruningTemplatesTemplate
 {
-    private static $keepDrafts = 10;
+    private $keepDrafts = 10;
 
     public function getTitle(): string
     {

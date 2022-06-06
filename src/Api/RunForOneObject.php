@@ -53,7 +53,7 @@ class RunForOneObject
      *
      * @var array
      */
-    protected static $templatesPerClassName = [];
+    protected $templatesPerClassName = [];
 
     protected $verbose = false;
 

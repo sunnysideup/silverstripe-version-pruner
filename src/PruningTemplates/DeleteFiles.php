@@ -36,20 +36,12 @@ class DeleteFiles extends PruningTemplatesTemplate
 
     protected function hasBeenDeleted(): bool
     {
-        $query = (new SQLSelect())
+        return (new SQLSelect())
+            ->setFrom($this->baseTable . '_Versions')
             ->setSelect(['RecordID, WasDeleted'])
             ->addWhere($this->normaliseWhere(['"WasDeleted" = ?' => 1]))
             ->setLimit(1)
+            ->count('ID') > 0 ? true : false;
         ;
-
-        $hasBeenDeleted = false;
-
-        $results = $query->execute();
-
-        foreach ($results as $result) {
-            $hasBeenDeleted = true;
-        }
-
-        return $hasBeenDeleted;
     }
 }

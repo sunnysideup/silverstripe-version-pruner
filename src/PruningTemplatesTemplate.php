@@ -117,9 +117,9 @@ abstract class PruningTemplatesTemplate
     protected function getBaseQuery(?array $additionalFieldsToSelect = []): SQLSelect
     {
         return (new SQLSelect())
-            ->setFrom($this->baseTable . '_Versions')
-            ->setSelect(array_merge(self::BASE_FIELDS, $additionalFieldsToSelect))
-            ->setOrderBy('"ID" DESC')
+            ->setFrom($this->baseTable . '_Versions') // important, of course!
+            ->setSelect(array_merge(self::BASE_FIELDS, $additionalFieldsToSelect)) // not sure if we need this.
+            ->setOrderBy('"ID" DESC') // important - we always work backwards
         ;
     }
 
