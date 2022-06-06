@@ -4,6 +4,7 @@ After: framework
 ---
 
 Sunnysideup\VersionPruner\Api\RunForOneObject:
+  templates:
     'default':
         Sunnysideup\VersionPruner\PruningTemplates\BasedOnTimeScale: []
 
