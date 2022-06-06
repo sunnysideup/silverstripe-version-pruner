@@ -14,8 +14,8 @@ class DeleteFiles extends PruningTemplatesTemplate
     public function run()
     {
         if ($this->hasBeenDeleted()) {
-            $query = $this->getBaseQuery();
-            $query->addWhere(['"RecordID" = ?' => $this->object->ID]);
+            $query = $this->getBaseQuery()
+                ->addWhere(['"RecordID" = ?' => $this->object->ID,]);
             //starting from "keepVersions" - going backwards in time
             $this->toDelete[$this->getUniqueKey()] = $this->addVersionNumberToArray(
                 $this->toDelete[$this->getUniqueKey()],
@@ -26,10 +26,10 @@ class DeleteFiles extends PruningTemplatesTemplate
 
     protected function hasBeenDeleted(): bool
     {
-        $query = new SQLSelect();
-        $query->setSelect(['RecordID']);
-        $query->addWhere(['"WasDeleted" = ?' => 1, 'RecordID = ? ' => $this->object->ID]);
-        $query->setLimit(1);
+        $query = (new SQLSelect())
+            ->setSelect(['RecordID, WasDeleted'])
+            ->addWhere($this->normaliseWhere(['"WasDeleted" = ?' => 1,]))
+            ->setLimit(1);
 
         $hasBeenDeleted = false;
 

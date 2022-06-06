@@ -33,19 +33,16 @@ class SiteTreeVersioningTemplate extends PruningTemplatesTemplate
      */
     protected function markOlderItemsWithTheSameKeyValues()
     {
-        $query = $this->getBaseQuery();
         $filter = [
-            '"RecordID" = ?' => $this->object->ID,
             '"WasPublished" = ?' => 1,
         ];
 
         foreach ($this->fieldsWithChangesToKeep as $field) {
             $filter['"' . $field . '" = ?'] = $this->object->{$field};
         }
-        $query->addWhere($filter);
-
-        //starting from "keepVersions" - going backwards in time
-        $query->setLimit(999999, $this->keepVersions);
+        $query = $this->getBaseQuery($this->fieldsWithChangesToKeep + ['WasPublished',])
+            ->addWhere($this->normaliseWhere($filter))
+            ->setLimit($this->normaliseLimit(), $this->normaliseOffset($this->keepVersions));
 
         $this->toDelete[$this->getUniqueKey()] = $this->addVersionNumberToArray(
             $this->toDelete[$this->getUniqueKey()],
@@ -55,24 +52,23 @@ class SiteTreeVersioningTemplate extends PruningTemplatesTemplate
 
     protected function markSuperfluousOnesWithDifferentKeyValues()
     {
-        $toKeep = $this->markItemsToKeep();
-        $query = $this->getBaseQuery($this->fieldsWithChangesToKeep);
+        $toKeep = $this->getItemsToKeep();
         $orFilterKey = '"' . implode('" != ? OR "', $this->fieldsWithChangesToKeep) . '" != ?';
         $orFilterValuesArray = [];
         foreach ($this->fieldsWithChangesToKeep as $field) {
             $orFilterValuesArray[] = $this->object->{$field};
         }
 
-        $query->addWhere(
-            [
-                '"RecordID" = ?' => $this->object->ID,
-                '"WasPublished" = ?' => 1,
-                '"Version" NOT IN (' . implode(',', $toKeep) . ')',
-                $orFilterKey => $orFilterValuesArray,
-            ]
-        );
-
-        $results = $query->execute();
+        $results = $this->getBaseQuery($this->fieldsWithChangesToKeep + ['WasPublished',])
+            ->addWhere(
+                [
+                    '"RecordID" = ?' => $this->object->ID,
+                    '"WasPublished" = ?' => 1,
+                    '"Version" NOT IN (' . implode(',', $toKeep) . ')',
+                    $orFilterKey => $orFilterValuesArray,
+                ]
+            )
+            ->execute();
 
         $changedRecords = [];
 
@@ -95,21 +91,19 @@ class SiteTreeVersioningTemplate extends PruningTemplatesTemplate
         }
     }
 
-    protected function markItemsToKeep(): array
+    protected function getItemsToKeep(): array
     {
         // Get the most recent Version IDs of all published pages to ensure
         // we leave at least X versions even if a URLSegment or ParentID
         // has changed.
-        $query = $this->getBaseQuery();
-        $query->addWhere(
-            [
-                '"RecordID" = ?' => $this->object->ID,
-                '"WasPublished" = ?' => 1,
-            ]
-        );
-
-        //todo: check limit
-        $query->setLimit($this->keepVersions, 0);
+        $query = $this->getBaseQuery(['WasPublished',])
+            ->addWhere(
+                [
+                    '"RecordID" = ?' => $this->object->ID,
+                    '"WasPublished" = ?' => 1,
+                ]
+            )
+            ->setLimit($this->keepVersions, 0);
 
         return $this->addVersionNumberToArray(
             [],

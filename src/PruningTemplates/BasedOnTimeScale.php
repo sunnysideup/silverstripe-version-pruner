@@ -55,16 +55,14 @@ class BasedOnTimeScale extends PruningTemplatesTemplate
     public function run()
     {
         $toKeep = $this->buildTimeScalePatternAndOnesToKeep();
-        $query = $this->getBaseQuery();
-        $query->addWhere(
-            [
-                '"RecordID" = ?' => $this->object->ID,
-                '"Version" NOT IN (' . implode(',', $toKeep) . ')',
-            ] +
-            $this->otherFilters
-        );
-
-        $results = $query->execute();
+        $query = $this->getBaseQuery()
+            ->addWhere(
+                [
+                    '"RecordID" = ?' => $this->object->ID,
+                    '"Version" NOT IN (' . implode(',', $toKeep) . ')',
+                ] +
+                $this->otherFilters
+            );
 
         $this->toDelete[$this->getUniqueKey()] = $this->addVersionNumberToArray(
             $this->toDelete[$this->getUniqueKey()],
@@ -88,17 +86,9 @@ class BasedOnTimeScale extends PruningTemplatesTemplate
                             TIMESTAMP(' . date('Y-m-d h:i:s', $fromTs) . ')
                             AND TIMESTAMP(' . date('Y-m-d h:i:s', $untilTs) . ')
                     )';
-                $query = $this->getBaseQuery();
-                $query->addWhere(
-                    [
-                        'RecordID = ' . $this->object->ID,
-                        $where,
-                    ] +
-                    $this->otherFilters
-                );
-
-                //todo: check limit!
-                $query->setLimit(1);
+                $query = $this->getBaseQuery()
+                    ->addWhere($this->normaliseWhere([$where,] + $this->otherFilters))
+                    ->setLimit(1);
 
                 $keep = $this->addVersionNumberToArray(
                     $keep,
