@@ -7,6 +7,23 @@ use Sunnysideup\VersionPruner\PruningTemplatesTemplate;
 
 class DeleteFiles extends PruningTemplatesTemplate
 {
+
+    /**
+     * Prune versions of deleted files/folders.
+     */
+    public function run()
+    {
+        if ($this->hasBeenDeleted()) {
+            $query = $this->getBaseQuery();
+            $query->addWhere(['"RecordID" = ?' => $this->object->ID]);
+            //starting from "keepVersions" - going backwards in time
+            $this->toDelete[$this->getUniqueKey()] = $this->addVersionNumberToArray(
+                $this->toDelete[$this->getUniqueKey()],
+                $query->execute()
+            );
+        }
+    }
+
     protected function hasBeenDeleted(): bool
     {
         $query = new SQLSelect();
@@ -25,21 +42,4 @@ class DeleteFiles extends PruningTemplatesTemplate
         return $hasBeenDeleted;
     }
 
-    /**
-     * Prune versions of deleted files/folders.
-     *
-     * @return HTTPResponse
-     */
-    private function run()
-    {
-        if ($this->hasBeenDeleted()) {
-            $query = $this->getBaseQuery();
-            $query->addWhere(['"RecordID" = ?' => $this->object->ID]);
-            //starting from "keepVersions" - going backwards in time
-            $this->toDelete[$this->getUniqueKey()] = $this->addVersionNumberToArray(
-                $this->toDelete[$this->getUniqueKey()],
-                $query->execute()
-            );
-        }
-    }
 }

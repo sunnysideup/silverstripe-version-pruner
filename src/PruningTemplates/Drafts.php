@@ -8,6 +8,7 @@ class Drafts extends PruningTemplatesTemplate
 {
     private static $keepDrafts = 10;
 
+
     public function setKeepDrafts(int $keepDrafts): self
     {
         $this->keepDrafts = $keepDrafts;
@@ -15,10 +16,10 @@ class Drafts extends PruningTemplatesTemplate
         return $this;
     }
 
-    protected function run()
+    public function run()
     {
         // remove drafts keeping `keep_drafts`
-        if ($keepDrafts > 0) {
+        if ($this->keepDrafts > 0) {
             $query = $this->getBaseQuery();
             $query->addWhere(
                 'RecordID = ' . $this->object->ID,
@@ -26,7 +27,7 @@ class Drafts extends PruningTemplatesTemplate
             );
 
             //todo: check limit!
-            $query->setLimit($keepDrafts, 0);
+            $query->setLimit($this->keepDrafts, 0);
 
             $this->toDelete[$this->getUniqueKey()] = $this->addVersionNumberToArray(
                 $this->toDelete[$this->getUniqueKey()],
@@ -34,4 +35,5 @@ class Drafts extends PruningTemplatesTemplate
             );
         }
     }
+
 }

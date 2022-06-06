@@ -54,8 +54,8 @@ class BasedOnTimeScale extends PruningTemplatesTemplate
 
     public function run()
     {
-        $keep = $this->buildTimeScalePatternAndOnesToKeep();
-
+        $toKeep = $this->buildTimeScalePatternAndOnesToKeep();
+        $query = $this->getBaseQuery();
         $query->addWhere(
             [
                 '"RecordID" = ?' => $this->object->ID,
