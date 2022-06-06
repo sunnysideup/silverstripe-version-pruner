@@ -18,7 +18,8 @@ use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Control\Director;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Dev\BuildTask;
-class Files extends PruningTemplatesTemplate
+
+class DeleteFiles extends PruningTemplatesTemplate
 {
     /**
      * Prune versions of deleted files/folders

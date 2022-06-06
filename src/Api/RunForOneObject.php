@@ -20,14 +20,32 @@ use SilverStripe\Dev\BuildTask;
 class RunForOneObject
 {
 
+    /**
+     * schema is:
+     * ```php
+     *     ClassName => [
+     *         PruningTemplateClassName1 => [
+     *             "PropertyName1" => Value1
+     *             "PropertyName2" => Value2
+     *         ],
+     *         PruningTemplateClassName2 => [
+     *         ],
+     *     ]
+     * ```
+     * @var array
+     */
     private static $templates = [
         'default' => [
-            DeleteOlderVersions::class,
+            BasedOnTimeScale::class => [],
         ],
         SiteTree::class => [
             Drafts::class => [],
             SiteTreeVersioningTemplate::class => [],
-        ]
+        ],
+        File::class => [
+            DeleteFiles::class => [],
+            BasedOnTimeScale::class => [],
+        ],
     ];
 
     protected $object = null;
