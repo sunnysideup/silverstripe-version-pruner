@@ -46,7 +46,7 @@ class RunForOneObject
      *
      * @var array
      */
-    protected static $templates_per_class_name = [];    
+    protected static $templates_per_class_name = [];
 
     protected $verbose = false;
 
@@ -182,20 +182,22 @@ class RunForOneObject
 
         return $hasStages;
     }
-    
+
     protected function findBestSuitedTemplates()
     {
         if (empty(self::$templates_per_class_name[$this->object->ClassName])) {
             $templates = $this->Config()->get('templates');
-            foreach($templates as $className => $classesWithOptions) {
-                if($this->object instanceof $className) {
+            foreach ($templates as $className => $classesWithOptions) {
+                if ($this->object instanceof $className) {
                     self::$templates_per_class_name[$this->object->ClassName] = $classesWithOptions;
+
                     return $classesWithOptions;
                 }
             }
-            self::$templates_per_class_name[$this->object->ClassName] = $templates['default'];        
+
+            self::$templates_per_class_name[$this->object->ClassName] = $templates['default'];
         }
-        
+
         return self::$templates_per_class_name[$this->object->ClassName];
     }
 
