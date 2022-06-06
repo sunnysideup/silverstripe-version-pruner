@@ -6,7 +6,7 @@ use Sunnysideup\VersionPruner\PruningTemplatesTemplate;
 
 class SiteTreeVersioningTemplate extends PruningTemplatesTemplate
 {
-    protected $keepVersions = 10;
+    protected $keepVersions = 30;
 
     protected $fieldsWithChangesToKeep = [
         'URLSegment',
@@ -20,6 +20,16 @@ class SiteTreeVersioningTemplate extends PruningTemplatesTemplate
         return $this;
     }
 
+    public function getTitle() : string
+    {
+        return 'SiteTree specific version pruning';
+    }
+
+    public function getDescription() : string
+    {
+        return 'Delete versions that are older and do not include any changes in ParentID or URLSegment.';
+    }
+
     public function run()
     {
         $this->markOlderItemsWithTheSameKeyValues();
@@ -27,7 +37,9 @@ class SiteTreeVersioningTemplate extends PruningTemplatesTemplate
     }
 
     /**
-     * these can be deleted safely, they are old and they are not different.
+     * these can be deleted.
+     *
+     * @return [type] [description]
      */
     protected function markOlderItemsWithTheSameKeyValues()
     {
@@ -64,7 +76,7 @@ class SiteTreeVersioningTemplate extends PruningTemplatesTemplate
                 [
                     '"RecordID" = ?' => $this->object->ID,
                     '"WasPublished" = ?' => 1,
-                    '"Version" NOT IN (' . implode(',', $toKeep) . ')',
+                    '"Version" NOT IN (' . implode(',', ($toKeep + [-1 => 0,])) . ')',
                     $orFilterKey => $orFilterValuesArray,
                 ]
             )

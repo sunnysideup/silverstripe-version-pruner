@@ -70,28 +70,35 @@ class RunForOneObject
         ],
     ];
 
-    public function __construct($object)
-    {
-        $this->object = $object;
-    }
-
     protected $verbose = false;
 
     /**
      * returns the total number deleted.
+     * @param DataObject $object
+     * @param bool      $verbose
+     * @return int
      */
-    public function run(?bool $verbose = false): int
+    public function deleteSuperfluousVersions($object, ?bool $verbose = false): int
     {
+        $this->object = $object;
         $this->verbose = $verbose;
-        if (false === $this->hasStages()) {
-            return 0;
-        }
-
-        if (false === $this->object->isLiveVersion()) {
-            return 0;
-        }
+        // if (false === $this->hasStages()) {
+        //     if($this->verbose) {
+        //         DB::alteration_message('... ... ... Error, no stages', 'deleted');
+        //     }
+        //     return 0;
+        // }
+        //
+        // echo 'B';
+        // if (false === $this->object->isLiveVersion()) {
+        //     if($this->verbose) {
+        //         DB::alteration_message('... ... ... Error, not a live version', 'deleted');
+        //     }
+        //     return 0;
+        // }
 
         // array of version IDs to delete
+        // IMPORTANT
         $this->toDelete[$this->getUniqueKey()] = [];
 
         // Base table has Versioned data
@@ -102,7 +109,7 @@ class RunForOneObject
         foreach ($myTemplates as $className => $options) {
             $runner = new $className($this->object, $this->toDelete[$this->getUniqueKey()]);
             if($this->verbose) {
-                DB::alteration_message('Running '.$runner->getTitle().': '.$runner->getDescription());
+                DB::alteration_message('... ... ... Running '.$runner->getTitle().': '.$runner->getDescription());
             }
             foreach ($options as $key => $value) {
                 $method = 'set' . $key;
@@ -111,6 +118,10 @@ class RunForOneObject
 
             $runner->run();
             $this->toDelete[$this->getUniqueKey()] = $runner->getToDelete();
+
+            if($this->verbose) {
+                DB::alteration_message('... ... ... total versions to delete now '.count($this->toDelete[$this->getUniqueKey()]));
+            }
         }
 
         if (! count($this->toDelete[$this->getUniqueKey()])) {
@@ -128,8 +139,13 @@ class RunForOneObject
                     AND "RecordID" = ' . (int) $this->object->ID;
 
             DB::query($delSQL);
-
+            if($this->verbose) {
+                DB::alteration_message('... ... ... running '.$delSQL);
+            }
             $totalDeleted += DB::affected_rows();
+            if($this->verbose) {
+                DB::alteration_message('... ... ... total deleted now ... '.$totalDeleted);
+            }
         }
 
         return $totalDeleted;
@@ -155,7 +171,7 @@ class RunForOneObject
             Versioned::set_reading_mode($oldMode);
         }
 
-        return $this->hasStages();
+        return $hasStages;
     }
 
     protected function getTablesForClassName(): array

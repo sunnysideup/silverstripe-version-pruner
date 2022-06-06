@@ -9,6 +9,8 @@ use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DB;
 use SilverStripe\Versioned\Versioned;
 
+use Sunnysideup\VersionPruner\Api\RunForOneObject;
+
 class PruneAllVersionedRecords extends BuildTask
 {
     /**
@@ -36,6 +38,7 @@ class PruneAllVersionedRecords extends BuildTask
 
         $totalTotalDeleted = 0;
 
+        $runObject = new RunForOneObject();
         foreach ($classes as $className) {
             DB::alteration_message('... Looking at ' . $className);
             $objects = Versioned::get_by_stage($className, Versioned::DRAFT);
@@ -43,8 +46,9 @@ class PruneAllVersionedRecords extends BuildTask
 
             foreach ($objects as $object) {
                 // check if stages are present
-                DB::alteration_message('... ... Checking #ID: ' . $object->ID);
-                $totalDeleted += (new RunForOneObject($object))->run();
+                // DB::alteration_message('... ... Checking #ID: ' . $object->ID);
+                $deleted = $runObject->deleteSuperfluousVersions($object, false);
+                $totalDeleted += $deleted;
             }
 
             if ($totalDeleted > 0) {

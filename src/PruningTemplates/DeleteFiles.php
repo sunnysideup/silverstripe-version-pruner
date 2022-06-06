@@ -7,6 +7,19 @@ use Sunnysideup\VersionPruner\PruningTemplatesTemplate;
 
 class DeleteFiles extends PruningTemplatesTemplate
 {
+
+
+    public function getTitle() : string
+    {
+        return 'File specific pruning';
+    }
+
+    public function getDescription() : string
+    {
+        return 'All versions are deleted for files that have been deleted.';
+    }
+
+
     /**
      * Prune versions of deleted files/folders.
      */

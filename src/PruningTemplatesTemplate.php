@@ -58,7 +58,9 @@ abstract class PruningTemplatesTemplate
     /**
      * list of Versions.
      *
-     * @param DataObject $object
+     * @var array
+     *
+     * @param mixed $object
      */
     public function __construct($object, array $toDelete)
     {
@@ -72,7 +74,11 @@ abstract class PruningTemplatesTemplate
      */
     abstract public function run();
 
-    public function getToDelete(string $baseTable): array
+    abstract public function getTitle() : string;
+
+    abstract public function getDescription() : string;
+
+    public function getToDelete(): array
     {
         return $this->toDelete[$this->getUniqueKey()];
     }
