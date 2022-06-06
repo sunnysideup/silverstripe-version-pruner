@@ -1,24 +1,22 @@
 <?php
+
 namespace Sunnysideup\VersionPruner\Api;
 
-use SilverStripe\Core\Config\Config;
-use SilverStripe\ORM\DataExtension;
+use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DB;
-use SilverStripe\ORM\Queries\SQLSelect;
 use SilverStripe\Versioned\Versioned;
-
-
-use Axllent\VersionTruncator\VersionTruncator;
-use SilverStripe\CMS\Model\SiteTree;
-use SilverStripe\Control\Director;
-use SilverStripe\Core\ClassInfo;
-use SilverStripe\Dev\BuildTask;
-
 
 class RunForOneObject
 {
+    protected $object;
+
+    protected $baseTable = '';
+
+    protected $toDelete = [];
+
+    protected static $tables_per_class_name = [];
 
     /**
      * schema is:
@@ -31,7 +29,8 @@ class RunForOneObject
      *         PruningTemplateClassName2 => [
      *         ],
      *     ]
-     * ```
+     * ```.
+     *
      * @var array
      */
     private static $templates = [
@@ -48,30 +47,21 @@ class RunForOneObject
         ],
     ];
 
-    protected $object = null;
-
-    protected $baseTable = '';
-
-    protected $toDelete = [];
-
     public function __construct($object)
     {
         $this->object = $object;
     }
 
     /**
-     * returns the total number deleted
-     *
-     * @return int
+     * returns the total number deleted.
      */
-    public function doVersionCleanup() : int
+    public function doVersionCleanup(): int
     {
-
-        if ($this->hasStages() === false) {
+        if (false === $this->hasStages()) {
             return 0;
         }
 
-        if ($this->object->isLiveVersion() === false) {
+        if (false === $this->object->isLiveVersion()) {
             return 0;
         }
 
@@ -85,16 +75,16 @@ class RunForOneObject
 
         $templates = $this->Config()->get('templates');
         $myTemlates = $templates[$this->object->ClassName] ?? $templates['default'];
-        foreach($myTemplates as $className => $options) {
+        foreach ($myTemplates as $className => $options) {
             $obj = new $className($this->object, $this->toDelete[$this->getUniqueKey()]);
-            foreach($options as $key => $value) {
-                $method = 'set'.$key;
-                $obj->$method($value);
+            foreach ($options as $key => $value) {
+                $method = 'set' . $key;
+                $obj->{$method}($value);
             }
             $obj->run();
             $this->toDelete[$this->getUniqueKey()] = $obj->getToDelete();
         }
-        if (!count($this->toDelete[$this->getUniqueKey()])) {
+        if (! count($this->toDelete[$this->getUniqueKey()])) {
             return;
         }
 
@@ -103,10 +93,10 @@ class RunForOneObject
         $queriedTables = $this->getTablesForClassName();
         foreach ($queriedTables as $table) {
             $delSQL = '
-                DELETE FROM "'.$table.'_Versions"
+                DELETE FROM "' . $table . '_Versions"
                 WHERE
-                    "Version" IN ('.implode(',', $this->toDelete[$this->getUniqueKey()]). ')
-                    AND "RecordID" = '.(int) $this->object->ID;
+                    "Version" IN (' . implode(',', $this->toDelete[$this->getUniqueKey()]) . ')
+                    AND "RecordID" = ' . (int) $this->object->ID;
 
             DB::query($delSQL);
 
@@ -117,40 +107,38 @@ class RunForOneObject
     }
 
     /**
-     * we use this to make sure we never mix up two records
-     * @return string
+     * we use this to make sure we never mix up two records.
      */
-    protected function getUniqueKey() : string
+    protected function getUniqueKey(): string
     {
         return $this->object->ClassName . '_' . $this->Object->ID;
     }
 
-    protected function hasStages() : bool
+    protected function hasStages(): bool
     {
         $oldMode = Versioned::get_reading_mode();
-        if ($oldMode != 'Stage.Stage') {
+        if ('Stage.Stage' !== $oldMode) {
             Versioned::set_reading_mode('Stage.Stage');
         }
         $hasStages = (bool) $this->object->hasStages();
-        if ($oldMode != 'Stage.Stage') {
+        if ('Stage.Stage' !== $oldMode) {
             Versioned::set_reading_mode($oldMode);
         }
 
         return $this->hasStages();
     }
 
-    protected static $tables_per_class_name = [];
-
-    protected function getTablesForClassName() : array
+    protected function getTablesForClassName(): array
     {
-        if(empty(self::$tables_per_class_name[$this->object->ClassName])) {
+        if (empty(self::$tables_per_class_name[$this->object->ClassName])) {
             $srcQuery = DataList::create($this->object->ClassName)
                 ->filter('ID', $this->object->ID)
                 ->dataQuery()
-                ->query();
+                ->query()
+            ;
             self::$tables_per_class_name[$this->object->ClassName] = $srcQuery->queriedTables();
         }
+
         return self::$tables_per_class_name[$this->object->ClassName];
     }
-
 }

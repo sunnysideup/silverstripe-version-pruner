@@ -1,27 +1,11 @@
 <?php
+
 namespace Sunnysideup\VersionPruner\PruningTemplates;
 
 use Sunnysideup\VersionPruner\PruningTemplatesTemplate;
 
-
-use SilverStripe\Core\Config\Config;
-use SilverStripe\ORM\DataExtension;
-use SilverStripe\ORM\DataList;
-use SilverStripe\ORM\DataObject;
-use SilverStripe\ORM\DB;
-use SilverStripe\ORM\Queries\SQLSelect;
-use SilverStripe\Versioned\Versioned;
-
-
-use Axllent\VersionTruncator\VersionTruncator;
-use SilverStripe\CMS\Model\SiteTree;
-use SilverStripe\Control\Director;
-use SilverStripe\Core\ClassInfo;
-use SilverStripe\Dev\BuildTask;
-
 class BasedOnTimeScale extends PruningTemplatesTemplate
 {
-
     protected $timeScale = [
         'Minutes' => [
             'Max' => 60,
@@ -51,18 +35,17 @@ class BasedOnTimeScale extends PruningTemplatesTemplate
     ];
 
     protected $otherFilters = [
-        '"WasPublished" = ?'                   => 1,
+        '"WasPublished" = ?' => 1,
     ];
 
-
-    public function setOtherFilters(array $otherFilters) : self
+    public function setOtherFilters(array $otherFilters): self
     {
         $this->otherFilters = $otherFilters;
 
         return $this;
     }
 
-    public function setTimeScale(array $timeScale) : self
+    public function setTimeScale(array $timeScale): self
     {
         $this->timeScale = $timeScale;
 
@@ -75,7 +58,7 @@ class BasedOnTimeScale extends PruningTemplatesTemplate
 
         $query->addWhere(
             [
-                '"RecordID" = ?'                       => $this->object->ID,
+                '"RecordID" = ?' => $this->object->ID,
                 '"Version" NOT IN (' . implode(',', $toKeep) . ')',
             ] +
             $this->otherFilters
@@ -89,28 +72,27 @@ class BasedOnTimeScale extends PruningTemplatesTemplate
         );
     }
 
-
-    protected function buildTimeScalePatternAndOnesToKeep() : array
+    protected function buildTimeScalePatternAndOnesToKeep(): array
     {
         $keep = [];
-        foreach($this->timeScale as $name => $options) {
+        foreach ($this->timeScale as $name => $options) {
             $min = $options['Min'] ?? 0;
             $max = $options['Max'] ?? 7;
             $interval = (int) $options['Interval'] ?? 1;
-            for($i = $min; $i < $max; $i = $i + $interval) {
-                $untilTs = strtotime('-'.$i.' '.$name);
-                $fromTs = strtotime('-'.($i + $interval).' '.$name);
+            for ($i = $min; $i < $max; $i = $i + $interval) {
+                $untilTs = strtotime('-' . $i . ' ' . $name);
+                $fromTs = strtotime('-' . ($i + $interval) . ' ' . $name);
                 $where =
                     '(
                         "LastEdited" BETWEEN
-                            TIMESTAMP('.date('Y-m-d h:i:s', $fromTs).')
-                            AND TIMESTAMP('.date('Y-m-d h:i:s', $untilTs).')
+                            TIMESTAMP(' . date('Y-m-d h:i:s', $fromTs) . ')
+                            AND TIMESTAMP(' . date('Y-m-d h:i:s', $untilTs) . ')
                     )';
                 $query = $this->getBaseQuery();
                 $query->addWhere(
                     [
                         'RecordID = ' . $this->object->ID,
-                        $where
+                        $where,
                     ] +
                     $this->otherFilters
                 );
@@ -124,8 +106,7 @@ class BasedOnTimeScale extends PruningTemplatesTemplate
                 );
             }
         }
+
         return $keep;
     }
-
-
 }

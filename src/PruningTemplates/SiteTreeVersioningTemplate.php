@@ -1,27 +1,11 @@
 <?php
+
 namespace Sunnysideup\VersionPruner\PruningTemplates;
 
 use Sunnysideup\VersionPruner\PruningTemplatesTemplate;
 
-
-use SilverStripe\Core\Config\Config;
-use SilverStripe\ORM\DataExtension;
-use SilverStripe\ORM\DataList;
-use SilverStripe\ORM\DataObject;
-use SilverStripe\ORM\DB;
-use SilverStripe\ORM\Queries\SQLSelect;
-use SilverStripe\Versioned\Versioned;
-
-
-use Axllent\VersionTruncator\VersionTruncator;
-use SilverStripe\CMS\Model\SiteTree;
-use SilverStripe\Control\Director;
-use SilverStripe\Core\ClassInfo;
-use SilverStripe\Dev\BuildTask;
-
 class SiteTreeVersioningTemplate extends PruningTemplatesTemplate
 {
-
     protected $keepVersions = 10;
 
     protected $fieldsWithChangesToKeep = [
@@ -29,7 +13,7 @@ class SiteTreeVersioningTemplate extends PruningTemplatesTemplate
         'ParentID',
     ];
 
-    public function setKeepVersions(int $keepVersions) : self
+    public function setKeepVersions(int $keepVersions): self
     {
         $this->keepVersions = $keepVersions;
 
@@ -43,19 +27,20 @@ class SiteTreeVersioningTemplate extends PruningTemplatesTemplate
     }
 
     /**
-     * these can be deleted
+     * these can be deleted.
+     *
      * @return [type] [description]
      */
     protected function markOlderItemsWithTheSameKeyValues()
     {
         $query = $this->getBaseQuery();
         $filter = [
-            '"RecordID" = ?'     => $this->object->ID,
+            '"RecordID" = ?' => $this->object->ID,
             '"WasPublished" = ?' => 1,
         ];
 
-        foreach($this->fieldsWithChangesToKeep as $field) {
-            $filter['"'.$field.'" = ?'] = $this->object->{$field};
+        foreach ($this->fieldsWithChangesToKeep as $field) {
+            $filter['"' . $field . '" = ?'] = $this->object->{$field};
         }
         $query->addWhere($filter);
 
@@ -72,19 +57,18 @@ class SiteTreeVersioningTemplate extends PruningTemplatesTemplate
     {
         $toKeep = $this->markItemsToKeep();
         $query = $this->getBaseQuery($this->fieldsWithChangesToKeep);
-        $orFilterKey = '"'.implode('" != ? OR "', $this->fieldsWithChangesToKeep).'" != ?';
+        $orFilterKey = '"' . implode('" != ? OR "', $this->fieldsWithChangesToKeep) . '" != ?';
         $orFilterValuesArray = [];
-        foreach($this->fieldsWithChangesToKeep as $field) {
+        foreach ($this->fieldsWithChangesToKeep as $field) {
             $orFilterValuesArray[] = $this->object->{$field};
         }
 
-
         $query->addWhere(
             [
-                '"RecordID" = ?'                       => $this->object->ID,
-                '"WasPublished" = ?'                   => 1,
+                '"RecordID" = ?' => $this->object->ID,
+                '"WasPublished" = ?' => 1,
                 '"Version" NOT IN (' . implode(',', $toKeep) . ')',
-                $orFilterKey                           => $orFilterValuesArray,
+                $orFilterKey => $orFilterValuesArray,
             ]
         );
 
@@ -96,12 +80,12 @@ class SiteTreeVersioningTemplate extends PruningTemplatesTemplate
         // version of each for URL redirection
         foreach ($results as $result) {
             $keyArray[] = [];
-            foreach($this->fieldsWithChangesToKeep as $field) {
+            foreach ($this->fieldsWithChangesToKeep as $field) {
                 $keyArray[] = $result[$field];
             }
             $key = implode('_', $keyArray);
 
-            if (! (in_array($key, $changedRecords))) {
+            if (! (in_array($key, $changedRecords, true))) {
                 //mark the first one, but do not mark it to delete
                 array_push($changedRecords, $key);
             } else {
@@ -111,16 +95,15 @@ class SiteTreeVersioningTemplate extends PruningTemplatesTemplate
         }
     }
 
-    protected function markItemsToKeep() : array
+    protected function markItemsToKeep(): array
     {
-
         // Get the most recent Version IDs of all published pages to ensure
         // we leave at least X versions even if a URLSegment or ParentID
         // has changed.
         $query = $this->getBaseQuery();
         $query->addWhere(
             [
-                '"RecordID" = ?'     => $this->object->ID,
+                '"RecordID" = ?' => $this->object->ID,
                 '"WasPublished" = ?' => 1,
             ]
         );
@@ -133,5 +116,4 @@ class SiteTreeVersioningTemplate extends PruningTemplatesTemplate
             $query->execute()
         );
     }
-
 }
