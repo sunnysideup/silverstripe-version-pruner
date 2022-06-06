@@ -8,14 +8,14 @@ class Drafts extends PruningTemplatesTemplate
 {
     private static $keepDrafts = 10;
 
-    public function getTitle() : string
+    public function getTitle(): string
     {
         return 'Prune drafts';
     }
 
-    public function getDescription() : string
+    public function getDescription(): string
     {
-        return 'Keep '.$this->keepDrafts.' drafts and delete all other drafts.';
+        return 'Keep ' . $this->keepDrafts . ' drafts and delete all other drafts.';
     }
 
     public function setKeepDrafts(int $keepDrafts): self

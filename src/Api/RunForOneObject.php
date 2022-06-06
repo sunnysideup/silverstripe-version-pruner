@@ -41,6 +41,8 @@ class RunForOneObject
      */
     protected static $tables_per_class_name = [];
 
+    protected $verbose = false;
+
     /**
      * schema is:
      * ```php
@@ -70,13 +72,11 @@ class RunForOneObject
         ],
     ];
 
-    protected $verbose = false;
-
     /**
      * returns the total number deleted.
+     *
      * @param DataObject $object
-     * @param bool      $verbose
-     * @return int
+     * @param bool       $verbose
      */
     public function deleteSuperfluousVersions($object, ?bool $verbose = false): int
     {
@@ -108,9 +108,10 @@ class RunForOneObject
         $myTemplates = $templates[$this->object->ClassName] ?? $templates['default'];
         foreach ($myTemplates as $className => $options) {
             $runner = new $className($this->object, $this->toDelete[$this->getUniqueKey()]);
-            if($this->verbose) {
-                DB::alteration_message('... ... ... Running '.$runner->getTitle().': '.$runner->getDescription());
+            if ($this->verbose) {
+                DB::alteration_message('... ... ... Running ' . $runner->getTitle() . ': ' . $runner->getDescription());
             }
+
             foreach ($options as $key => $value) {
                 $method = 'set' . $key;
                 $runner->{$method}($value);
@@ -119,8 +120,8 @@ class RunForOneObject
             $runner->run();
             $this->toDelete[$this->getUniqueKey()] = $runner->getToDelete();
 
-            if($this->verbose) {
-                DB::alteration_message('... ... ... total versions to delete now '.count($this->toDelete[$this->getUniqueKey()]));
+            if ($this->verbose) {
+                DB::alteration_message('... ... ... total versions to delete now ' . count($this->toDelete[$this->getUniqueKey()]));
             }
         }
 
@@ -139,12 +140,13 @@ class RunForOneObject
                     AND "RecordID" = ' . (int) $this->object->ID;
 
             DB::query($delSQL);
-            if($this->verbose) {
-                DB::alteration_message('... ... ... running '.$delSQL);
+            if ($this->verbose) {
+                DB::alteration_message('... ... ... running ' . $delSQL);
             }
+
             $totalDeleted += DB::affected_rows();
-            if($this->verbose) {
-                DB::alteration_message('... ... ... total deleted now ... '.$totalDeleted);
+            if ($this->verbose) {
+                DB::alteration_message('... ... ... total deleted now ... ' . $totalDeleted);
             }
         }
 

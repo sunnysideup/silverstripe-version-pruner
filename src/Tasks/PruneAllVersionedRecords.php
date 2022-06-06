@@ -9,8 +9,6 @@ use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DB;
 use SilverStripe\Versioned\Versioned;
 
-use Sunnysideup\VersionPruner\Api\RunForOneObject;
-
 class PruneAllVersionedRecords extends BuildTask
 {
     /**
@@ -33,11 +31,8 @@ class PruneAllVersionedRecords extends BuildTask
     public function run($request)
     {
         $classes = $this->getAllVersionedDataClasses();
-
         DB::alteration_message('Pruning all DataObjects');
-
         $totalTotalDeleted = 0;
-
         $runObject = new RunForOneObject();
         foreach ($classes as $className) {
             DB::alteration_message('... Looking at ' . $className);
@@ -47,13 +42,11 @@ class PruneAllVersionedRecords extends BuildTask
             foreach ($objects as $object) {
                 // check if stages are present
                 // DB::alteration_message('... ... Checking #ID: ' . $object->ID);
-                $deleted = $runObject->deleteSuperfluousVersions($object, false);
-                $totalDeleted += $deleted;
+                $totalDeleted += $runObject->deleteSuperfluousVersions($object, false);
             }
 
             if ($totalDeleted > 0) {
                 DB::alteration_message('... ... Deleted ' . $totalDeleted . ' records');
-
                 $totalTotalDeleted += $totalDeleted;
             }
         }
@@ -71,20 +64,18 @@ class PruneAllVersionedRecords extends BuildTask
         foreach ($allClasses as $className) {
             if (DataObject::has_extension($className, Versioned::class)) {
                 $ancestors = ClassInfo::ancestry($className);
-                foreach($ancestors as $classNameInner) {
+                foreach ($ancestors as $classNameInner) {
                     if (DataObject::has_extension($classNameInner, Versioned::class)) {
                         $versionedClasses[$classNameInner] = $classNameInner;
+
                         continue 2;
                     }
                 }
+
                 $versionedClasses[$className] = $className;
-
             }
-
         }
 
         return $versionedClasses;
     }
-
-
 }

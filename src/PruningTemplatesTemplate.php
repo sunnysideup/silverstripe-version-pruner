@@ -74,9 +74,9 @@ abstract class PruningTemplatesTemplate
      */
     abstract public function run();
 
-    abstract public function getTitle() : string;
+    abstract public function getTitle(): string;
 
-    abstract public function getDescription() : string;
+    abstract public function getDescription(): string;
 
     public function getToDelete(): array
     {

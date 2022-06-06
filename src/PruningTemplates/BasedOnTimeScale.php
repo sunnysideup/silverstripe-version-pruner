@@ -55,12 +55,12 @@ class BasedOnTimeScale extends PruningTemplatesTemplate
         return $this;
     }
 
-    public function getTitle() : string
+    public function getTitle(): string
     {
         return 'Prune versions based on time ago';
     }
 
-    public function getDescription() : string
+    public function getDescription(): string
     {
         return 'Ones close to now are kept at a more regular interval (e.g. one per hour) and olders ones at a less regular interval (e.g. one per month).';
     }

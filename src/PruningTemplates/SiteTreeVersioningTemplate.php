@@ -20,12 +20,12 @@ class SiteTreeVersioningTemplate extends PruningTemplatesTemplate
         return $this;
     }
 
-    public function getTitle() : string
+    public function getTitle(): string
     {
         return 'SiteTree specific version pruning';
     }
 
-    public function getDescription() : string
+    public function getDescription(): string
     {
         return 'Delete versions that are older and do not include any changes in ParentID or URLSegment.';
     }
@@ -76,7 +76,7 @@ class SiteTreeVersioningTemplate extends PruningTemplatesTemplate
                 [
                     '"RecordID" = ?' => $this->object->ID,
                     '"WasPublished" = ?' => 1,
-                    '"Version" NOT IN (' . implode(',', ($toKeep + [-1 => 0,])) . ')',
+                    '"Version" NOT IN (' . implode(',', ($toKeep + [-1 => 0])) . ')',
                     $orFilterKey => $orFilterValuesArray,
                 ]
             )
