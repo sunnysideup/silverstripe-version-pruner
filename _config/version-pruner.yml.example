@@ -3,14 +3,25 @@ Name: 'VersionPruner'
 After: framework
 ---
 
+# note: order is important - classes that extend another should come last - 
+# e.g. SiteTree first and then Page then HomePage
+# default is the last resort.
+
 Sunnysideup\VersionPruner\Api\RunForOneObject:
   templates:
+  
     'default':
         Sunnysideup\VersionPruner\PruningTemplates\BasedOnTimeScale: []
 
     SilverStripe\CMS\Model\SiteTree:
         Sunnysideup\VersionPruner\PruningTemplates\Drafts: []
         Sunnysideup\VersionPruner\PruningTemplates\SiteTreeVersioningTemplate: []
+        
+    Client\Website\Model\MoreSpecificPage:
+        Sunnysideup\VersionPruner\PruningTemplates\SiteTreeVersioningTemplate: []        
+        
+    Client\Website\Model\ExtendsMoreSpecificPage:
+        Sunnysideup\VersionPruner\PruningTemplates\SiteTreeVersioningTemplate: []      
 
     SilverStripe\Assets\Files:
         Sunnysideup\VersionPruner\PruningTemplates\DeleteFiles: []
