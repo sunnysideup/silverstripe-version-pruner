@@ -5,8 +5,8 @@ namespace Sunnysideup\VersionPruner\Api;
 use SilverStripe\Assets\File;
 use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Core\Config\Configurable;
-use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Core\Injector\Injectable;
+use SilverStripe\Core\Injector\Injector;
 use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DB;
@@ -36,7 +36,8 @@ class RunForOneObject
     protected $toDelete = [];
 
     /**
-     * reversed list of templates (most specific first)
+     * reversed list of templates (most specific first).
+     *
      * @var array
      */
     protected $templatesAvailable = [];
@@ -56,19 +57,6 @@ class RunForOneObject
     protected $templatesPerClassName = [];
 
     protected $verbose = false;
-
-    public static function inst()
-    {
-        return Injector::inst()->get(static::class);
-    }
-
-    public function __construct()
-    {
-        $this->templatesAvailable = array_reverse(
-            $this->Config()->get('templates'),
-            true //important - to preserve keys!
-        );
-    }
 
     /**
      * schema is:
@@ -99,6 +87,19 @@ class RunForOneObject
             BasedOnTimeScale::class => [],
         ],
     ];
+
+    public function __construct()
+    {
+        $this->templatesAvailable = array_reverse(
+            $this->Config()->get('templates'),
+            true //important - to preserve keys!
+        );
+    }
+
+    public static function inst()
+    {
+        return Injector::inst()->get(static::class);
+    }
 
     /**
      * returns the total number deleted.
@@ -210,10 +211,12 @@ class RunForOneObject
             foreach ($this->templatesAvailable as $className => $classesWithOptions) {
                 if (is_a($this->object, $className)) {
                     $this->templatesPerClassName[$this->object->ClassName] = $classesWithOptions;
+
                     break;
                 }
             }
-            if(! isset($this->templatesPerClassName[$this->object->ClassName])) {
+
+            if (! isset($this->templatesPerClassName[$this->object->ClassName])) {
                 $this->templatesPerClassName[$this->object->ClassName] = $templates['default'] ?? $classesWithOptions;
             }
         }

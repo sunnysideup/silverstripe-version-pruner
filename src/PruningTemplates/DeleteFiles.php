@@ -41,7 +41,6 @@ class DeleteFiles extends PruningTemplatesTemplate
             ->setSelect(['RecordID, WasDeleted'])
             ->addWhere($this->normaliseWhere(['"WasDeleted" = ?' => 1]))
             ->setLimit(1)
-            ->count('ID') > 0 ? true : false;
-        ;
+            ->count('ID') > 0;
     }
 }

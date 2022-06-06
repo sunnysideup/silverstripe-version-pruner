@@ -13,6 +13,11 @@ use SilverStripe\Versioned\Versioned;
 class PruneAllVersionedRecords extends BuildTask
 {
     /**
+     * @var int
+     */
+    protected const MAX_ITEMS_PER_CLASS = 500;
+
+    /**
      * @var string
      */
     protected $title = 'Prune all versioned records';
@@ -24,9 +29,6 @@ class PruneAllVersionedRecords extends BuildTask
      */
     private static $segment = 'prune-all-versioned-records';
 
-
-    protected const MAX_ITEMS_PER_CLASS = 500;
-
     /**
      * Prune all published DataObjects which are published according to config.
      *
@@ -35,7 +37,7 @@ class PruneAllVersionedRecords extends BuildTask
     public function run($request)
     {
         $classes = $this->getAllVersionedDataClasses();
-        DB::alteration_message('Pruning all DataObjects with a maximum of '.self::MAX_ITEMS_PER_CLASS.' per class.');
+        DB::alteration_message('Pruning all DataObjects with a maximum of ' . self::MAX_ITEMS_PER_CLASS . ' per class.');
         $totalTotalDeleted = 0;
         $runObject = RunForOneObject::inst();
         foreach ($classes as $className) {
@@ -56,6 +58,14 @@ class PruneAllVersionedRecords extends BuildTask
         }
 
         DB::alteration_message('Completed, pruned ' . $totalTotalDeleted . ' records');
+    }
+
+    protected function getObjectsPerClassName(string $className): DataList
+    {
+        return Versioned::get_by_stage($className, Versioned::DRAFT)
+            ->sort(DB::get_conn()->random() . ' ASC')
+            ->limit(self::MAX_ITEMS_PER_CLASS)
+        ;
     }
 
     /**
@@ -82,12 +92,4 @@ class PruneAllVersionedRecords extends BuildTask
 
         return $versionedClasses;
     }
-
-    protected function getObjectsPerClassName(string $className) : DataList
-    {
-        return Versioned::get_by_stage($className, Versioned::DRAFT)
-            ->sort(DB::get_conn()->random(). ' ASC')
-            ->limit(self::MAX_ITEMS_PER_CLASS);
-    }
-
 }
