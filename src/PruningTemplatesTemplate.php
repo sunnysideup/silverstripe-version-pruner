@@ -59,7 +59,6 @@ abstract class PruningTemplatesTemplate
      * list of Versions.
      *
      * @param DataObject $object
-     * @param array      $toDelete
      */
     public function __construct($object, array $toDelete)
     {

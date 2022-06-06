@@ -2,6 +2,7 @@
 
 namespace Sunnysideup\VersionPruner\Api;
 
+use SilverStripe\Assets\File;
 use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Injector\Injectable;
@@ -9,8 +10,6 @@ use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DB;
 use SilverStripe\Versioned\Versioned;
-
-use SilverStripe\Assets\File;
 use Sunnysideup\VersionPruner\PruningTemplates\BasedOnTimeScale;
 use Sunnysideup\VersionPruner\PruningTemplates\DeleteFiles;
 use Sunnysideup\VersionPruner\PruningTemplates\Drafts;
@@ -21,7 +20,6 @@ class RunForOneObject
     use Configurable;
     use Injectable;
 
-
     /**
      * Versioned DataObject.
      *
@@ -31,12 +29,14 @@ class RunForOneObject
 
     /**
      * array of Version numbers to delete.
+     *
      * @var string
      */
     protected $toDelete = [];
 
     /**
      * list of tables to delete per class name.
+     *
      * @var array
      */
     protected static $tables_per_class_name = [];

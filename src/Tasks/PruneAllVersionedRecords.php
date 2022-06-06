@@ -37,7 +37,7 @@ class PruneAllVersionedRecords extends BuildTask
         $totalTotalDeleted = 0;
 
         foreach ($classes as $className) {
-            DB::alteration_message('... Looking at '.$className);
+            DB::alteration_message('... Looking at ' . $className);
             $objects = Versioned::get_by_stage($className, Versioned::DRAFT);
             $totalDeleted = 0;
 
@@ -60,10 +60,8 @@ class PruneAllVersionedRecords extends BuildTask
 
     /**
      * Get all versioned database classes.
-     *
-     * @return array
      */
-    private function getAllVersionedDataClasses() : array
+    private function getAllVersionedDataClasses(): array
     {
         $allClasses = ClassInfo::subclassesFor(DataObject::class);
         $versionedClasses = [];
