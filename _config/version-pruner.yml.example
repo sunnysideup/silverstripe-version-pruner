@@ -1,0 +1,16 @@
+---
+Name: 'VersionPruner'
+After: framework
+---
+
+Sunnysideup\VersionPruner\Api\RunForOneObject:
+    'default':
+        Sunnysideup\VersionPruner\PruningTemplates\BasedOnTimeScale: []
+
+    SilverStripe\CMS\Model\SiteTree:
+        Sunnysideup\VersionPruner\PruningTemplates\Drafts: []
+        Sunnysideup\VersionPruner\PruningTemplates\SiteTreeVersioningTemplate: []
+
+    SilverStripe\Assets\Files:
+        Sunnysideup\VersionPruner\PruningTemplates\DeleteFiles: []
+        Sunnysideup\VersionPruner\PruningTemplates\BasedOnTimeScale: []

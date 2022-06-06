@@ -83,18 +83,16 @@ class RunForOneObject
         $this->object = $object;
         $this->verbose = $verbose;
         if (false === $this->hasStages()) {
-            if ($this->verbose) {
+            if($this->verbose) {
                 DB::alteration_message('... ... ... Error, no stages', 'deleted');
             }
-
             return 0;
         }
 
         if (false === $this->object->isLiveVersion()) {
-            if ($this->verbose) {
+            if($this->verbose) {
                 DB::alteration_message('... ... ... Error, not a live version', 'deleted');
             }
-
             return 0;
         }
 
