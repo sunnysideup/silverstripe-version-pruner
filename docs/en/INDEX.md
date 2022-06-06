@@ -11,11 +11,11 @@ See: https://github.com/sunnysideup/silverstripe-version-pruner/edit/master/_con
 Run all the pruning in one go using this command on the command line:
 
 ```
-vendor/bin/sake dev/tasks/prunes-all-versioned-records
+vendor/bin/sake dev/tasks/prune-all-versioned-records
 ```
 
 OR browse to (not recommended):
 
 ```
-http://www.mysite.com.nz/dev/tasks/prunes-all-versioned-records
+http://www.mysite.com.nz/dev/tasks/prune-all-versioned-records
 ```
