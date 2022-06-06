@@ -20,8 +20,6 @@ use SilverStripe\Dev\BuildTask;
 abstract class PruningTemplatesTemplate
 {
 
-    use Configurable;
-
 
     protected $object = null;
 

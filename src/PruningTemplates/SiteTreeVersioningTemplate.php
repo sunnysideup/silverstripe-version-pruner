@@ -39,10 +39,13 @@ class SiteTreeVersioningTemplate extends PruningTemplatesTemplate
     public function run()
     {
         $this->markOlderItemsWithTheSameKeyValues();
-        $this->keepOneOfEachOlderItemWithDifferentKeyValues();
-
+        $this->markSuperfluousOnesWithDifferentKeyValues();
     }
 
+    /**
+     * these can be deleted
+     * @return [type] [description]
+     */
     protected function markOlderItemsWithTheSameKeyValues()
     {
         $query = $this->getBaseQuery();
@@ -65,7 +68,7 @@ class SiteTreeVersioningTemplate extends PruningTemplatesTemplate
         );
     }
 
-    protected function keepOneOfEachOlderItemWithDifferentKeyValues()
+    protected function markSuperfluousOnesWithDifferentKeyValues()
     {
         $toKeep = $this->markItemsToKeep();
         $query = $this->getBaseQuery($this->fieldsWithChangesToKeep);
