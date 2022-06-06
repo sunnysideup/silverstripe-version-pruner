@@ -41,6 +41,13 @@ class RunForOneObject
      */
     protected static $tables_per_class_name = [];
 
+    /**
+     * list of templates per class name.
+     *
+     * @var array
+     */
+    protected static $templates_per_class_name = [];    
+
     protected $verbose = false;
 
     /**
@@ -105,8 +112,7 @@ class RunForOneObject
         // Base table has Versioned data
         $totalDeleted = 0;
 
-        $templates = $this->Config()->get('templates');
-        $myTemplates = $templates[$this->object->ClassName] ?? $templates['default'];
+        $myTemplates = $this->findBestSuitedTemplates();
         foreach ($myTemplates as $className => $options) {
             $runner = new $className($this->object, $this->toDelete[$this->getUniqueKey()]);
             if ($this->verbose) {
@@ -175,6 +181,22 @@ class RunForOneObject
         }
 
         return $hasStages;
+    }
+    
+    protected function findBestSuitedTemplates()
+    {
+        if (empty(self::$templates_per_class_name[$this->object->ClassName])) {
+            $templates = $this->Config()->get('templates');
+            foreach($templates as $className => $classesWithOptions) {
+                if($this->object instanceof $className) {
+                    self::$templates_per_class_name[$this->object->ClassName] = $classesWithOptions;
+                    return $classesWithOptions;
+                }
+            }
+            self::$templates_per_class_name[$this->object->ClassName] = $templates['default'];        
+        }
+        
+        return self::$templates_per_class_name[$this->object->ClassName];
     }
 
     protected function getTablesForClassName(): array
