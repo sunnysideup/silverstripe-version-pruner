@@ -1,28 +1,16 @@
 <?php
+
 namespace Sunnysideup\VersionPruner\Api;
 
-
+use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Config;
-use SilverStripe\ORM\DataExtension;
-use SilverStripe\ORM\DataList;
+use SilverStripe\Dev\BuildTask;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DB;
-use SilverStripe\ORM\Queries\SQLSelect;
 use SilverStripe\Versioned\Versioned;
-
-
-use Axllent\VersionTruncator\VersionTruncator;
-use SilverStripe\CMS\Model\SiteTree;
-use SilverStripe\Control\Director;
-use SilverStripe\Core\ClassInfo;
-use SilverStripe\Dev\BuildTask;
-
-use Sunnysideup\VersionPruner\Api\RunForOneObject;
-
 
 class PruneAllVersionedRecords extends BuildTask
 {
-
     /**
      * @var string
      */
@@ -36,9 +24,9 @@ class PruneAllVersionedRecords extends BuildTask
     private static $segment = 'prunes-all-versioned-records';
 
     /**
-     * Prune all published DataObjects which are published according to config
+     * Prune all published DataObjects which are published according to config.
      *
-     * @return void
+     * @param mixed $request
      */
     public function run($request)
     {
@@ -70,7 +58,7 @@ class PruneAllVersionedRecords extends BuildTask
     }
 
     /**
-     * Get all versioned database classes
+     * Get all versioned database classes.
      *
      * @return array
      */

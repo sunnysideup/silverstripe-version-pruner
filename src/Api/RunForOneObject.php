@@ -1,24 +1,24 @@
 <?php
 
 namespace Sunnysideup\VersionPruner\Api;
-use Sunnysideup\VersionPruner\PruningTemplates\BasedOnTimeScale;
-use Sunnysideup\VersionPruner\PruningTemplates\DeleteFiles;
-use Sunnysideup\VersionPruner\PruningTemplates\Drafts;
-use Sunnysideup\VersionPruner\PruningTemplates\SiteTreeVersioningTemplate;
+
+use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Injector\Injectable;
-use SilverStripe\Core\Injector\Injector;
-use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DB;
 use SilverStripe\Versioned\Versioned;
+use Sunnysideup\VersionPruner\PruningTemplates\BasedOnTimeScale;
+use Sunnysideup\VersionPruner\PruningTemplates\DeleteFiles;
+use Sunnysideup\VersionPruner\PruningTemplates\Drafts;
+use Sunnysideup\VersionPruner\PruningTemplates\SiteTreeVersioningTemplate;
 
 class RunForOneObject
 {
-
     use Configurable;
     use Injectable;
+    public $Object;
 
     protected $object;
 
@@ -89,9 +89,11 @@ class RunForOneObject
                 $method = 'set' . $key;
                 $obj->{$method}($value);
             }
+
             $obj->run();
             $this->toDelete[$this->getUniqueKey()] = $obj->getToDelete();
         }
+
         if (! count($this->toDelete[$this->getUniqueKey()])) {
             return 0;
         }
@@ -128,6 +130,7 @@ class RunForOneObject
         if ('Stage.Stage' !== $oldMode) {
             Versioned::set_reading_mode('Stage.Stage');
         }
+
         $hasStages = (bool) $this->object->hasStages();
         if ('Stage.Stage' !== $oldMode) {
             Versioned::set_reading_mode($oldMode);

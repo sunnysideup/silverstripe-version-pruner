@@ -62,7 +62,8 @@ class BasedOnTimeScale extends PruningTemplatesTemplate
                     '"Version" NOT IN (' . implode(',', $toKeep) . ')',
                 ] +
                 $this->otherFilters
-            );
+            )
+        ;
 
         $this->toDelete[$this->getUniqueKey()] = $this->addVersionNumberToArray(
             $this->toDelete[$this->getUniqueKey()],
@@ -77,7 +78,7 @@ class BasedOnTimeScale extends PruningTemplatesTemplate
             $min = $options['Min'] ?? 0;
             $max = $options['Max'] ?? 7;
             $interval = (int) $options['Interval'] ?? 1;
-            for ($i = $min; $i < $max; $i = $i + $interval) {
+            for ($i = $min; $i < $max; $i += $interval) {
                 $untilTs = strtotime('-' . $i . ' ' . $name);
                 $fromTs = strtotime('-' . ($i + $interval) . ' ' . $name);
                 $where =
@@ -87,8 +88,9 @@ class BasedOnTimeScale extends PruningTemplatesTemplate
                             AND TIMESTAMP(' . date('Y-m-d h:i:s', $untilTs) . ')
                     )';
                 $query = $this->getBaseQuery()
-                    ->addWhere($this->normaliseWhere([$where,] + $this->otherFilters))
-                    ->setLimit(1);
+                    ->addWhere($this->normaliseWhere([$where] + $this->otherFilters))
+                    ->setLimit(1)
+                ;
 
                 $keep = $this->addVersionNumberToArray(
                     $keep,

@@ -19,14 +19,15 @@ class Drafts extends PruningTemplatesTemplate
     {
         // remove drafts keeping `keep_drafts`
         if ($this->keepDrafts > 0) {
-            $query = $this->getBaseQuery(['WasPublished',])
+            $query = $this->getBaseQuery(['WasPublished'])
                 ->addWhere(
                     [
                         'RecordID = ' . $this->object->ID,
-                        'WasPublished = 0'
+                        'WasPublished = 0',
                     ]
                 )
-                ->setLimit($this->normaliseLimit(), $this->normaliseOffset($this->keepDrafts));
+                ->setLimit($this->normaliseLimit(), $this->normaliseOffset($this->keepDrafts))
+            ;
 
             $this->toDelete[$this->getUniqueKey()] = $this->addVersionNumberToArray(
                 $this->toDelete[$this->getUniqueKey()],
@@ -34,5 +35,4 @@ class Drafts extends PruningTemplatesTemplate
             );
         }
     }
-
 }

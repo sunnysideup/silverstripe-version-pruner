@@ -40,9 +40,11 @@ class SiteTreeVersioningTemplate extends PruningTemplatesTemplate
         foreach ($this->fieldsWithChangesToKeep as $field) {
             $filter['"' . $field . '" = ?'] = $this->object->{$field};
         }
-        $query = $this->getBaseQuery($this->fieldsWithChangesToKeep + ['WasPublished',])
+
+        $query = $this->getBaseQuery($this->fieldsWithChangesToKeep + ['WasPublished'])
             ->addWhere($this->normaliseWhere($filter))
-            ->setLimit($this->normaliseLimit(), $this->normaliseOffset($this->keepVersions));
+            ->setLimit($this->normaliseLimit(), $this->normaliseOffset($this->keepVersions))
+        ;
 
         $this->toDelete[$this->getUniqueKey()] = $this->addVersionNumberToArray(
             $this->toDelete[$this->getUniqueKey()],
@@ -59,7 +61,7 @@ class SiteTreeVersioningTemplate extends PruningTemplatesTemplate
             $orFilterValuesArray[] = $this->object->{$field};
         }
 
-        $results = $this->getBaseQuery($this->fieldsWithChangesToKeep + ['WasPublished',])
+        $results = $this->getBaseQuery($this->fieldsWithChangesToKeep + ['WasPublished'])
             ->addWhere(
                 [
                     '"RecordID" = ?' => $this->object->ID,
@@ -68,7 +70,8 @@ class SiteTreeVersioningTemplate extends PruningTemplatesTemplate
                     $orFilterKey => $orFilterValuesArray,
                 ]
             )
-            ->execute();
+            ->execute()
+        ;
 
         $changedRecords = [];
 
@@ -79,11 +82,12 @@ class SiteTreeVersioningTemplate extends PruningTemplatesTemplate
             foreach ($this->fieldsWithChangesToKeep as $field) {
                 $keyArray[] = $result[$field];
             }
+
             $key = implode('_', $keyArray);
 
             if (! (in_array($key, $changedRecords, true))) {
                 //mark the first one, but do not mark it to delete
-                array_push($changedRecords, $key);
+                $changedRecords[] = $key;
             } else {
                 // the first one has been done, so we can delete others...
                 $this->toDelete[$this->getUniqueKey()][$result['Version']] = $result['Version'];
@@ -96,14 +100,15 @@ class SiteTreeVersioningTemplate extends PruningTemplatesTemplate
         // Get the most recent Version IDs of all published pages to ensure
         // we leave at least X versions even if a URLSegment or ParentID
         // has changed.
-        $query = $this->getBaseQuery(['WasPublished',])
+        $query = $this->getBaseQuery(['WasPublished'])
             ->addWhere(
                 [
                     '"RecordID" = ?' => $this->object->ID,
                     '"WasPublished" = ?' => 1,
                 ]
             )
-            ->setLimit($this->keepVersions, 0);
+            ->setLimit($this->keepVersions, 0)
+        ;
 
         return $this->addVersionNumberToArray(
             [],
