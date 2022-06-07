@@ -4,14 +4,14 @@ There is a [build task](https://github.com/sunnysideup/silverstripe-version-prun
 
 For each versioned class (e.g. `SiteTree`, `File`, etc...), it takes 500 random records (or less)
 
-For each of these random records, it passes it to the [RunForOneObject](https://github.com/sunnysideup/silverstripe-version-pruner/blob/master/src/Api/RunForOneObject.php). This runner can be configured using static variables (see [yml example file](https://github.com/sunnysideup/silverstripe-version-pruner/edit/master/_config/version-pruner.yml.example)) to determine what pruners run for what class.
+For each of these random records, it passes it to the [RunForOneObject](https://github.com/sunnysideup/silverstripe-version-pruner/blob/master/src/Api/RunForOneObject.php). This runner can be configured using static variables (see [yml example file](https://github.com/sunnysideup/silverstripe-version-pruner/blob/master/_config/version-pruner.yml.example)) to determine what pruners run for what class.
 
 By default, a [few pruners](https://github.com/sunnysideup/silverstripe-version-pruner/tree/master/src/PruningTemplates) have been included.  For any class, you can combine them as you see fit. The [default one](https://github.com/sunnysideup/silverstripe-version-pruner/blob/master/src/PruningTemplates/BasedOnTimeScale.php) prunes based on time: the further away you get from today, the more versions are pruned - e.g. we keep one every two hours for the last 24 hours, and one for every year once you go a lot further back in time. 
 
 
 # how to configure
 
-[example](https://github.com/sunnysideup/silverstripe-version-pruner/edit/master/_config/version-pruner.yml.example)
+see [example](https://github.com/sunnysideup/silverstripe-version-pruner/blob/master/_config/version-pruner.yml.example)
 
 # how to run
 
