@@ -56,7 +56,17 @@ class RunForOneObject
      */
     protected $templatesPerClassName = [];
 
+    /**
+     *
+     * @var bool
+     */
     protected $verbose = false;
+
+    /**
+     *
+     * @var bool
+     */
+    protected $dryRun = false;
 
     /**
      * schema is:
@@ -99,6 +109,18 @@ class RunForOneObject
     public static function inst()
     {
         return Injector::inst()->get(static::class);
+    }
+
+    public function setVerbose(?bool $verbose = true) : self
+    {
+        $this->verbose = $verbose;
+        return $this;
+    }
+
+    public function setDry(?bool $dryRun = true) : self
+    {
+        $this->dryRun = $dryRun;
+        return $this;
     }
 
     /**
@@ -162,20 +184,39 @@ class RunForOneObject
         // database tables relating to DataObject
         $queriedTables = $this->getTablesForClassName();
         foreach ($queriedTables as $table) {
-            $delSQL = '
-                DELETE FROM "' . $table . '_Versions"
-                WHERE
-                    "Version" IN (' . implode(',', $this->toDelete[$this->getUniqueKey()]) . ')
-                    AND "RecordID" = ' . (int) $this->object->ID;
+            if($this->dryRun === true) {
+                $select = '
+                    SELECT COUNT(ID) AS C FROM "' . $table . '_Versions"
+                    WHERE
+                        "Version" IN (' . implode(',', $this->toDelete[$this->getUniqueKey()]) . ')
+                        AND "RecordID" = ' . (int) $this->object->ID;
 
-            DB::query($delSQL);
-            if ($this->verbose) {
-                DB::alteration_message('... ... ... running ' . $delSQL);
+                $value = DB::query($select)->value();
+                if ($this->verbose) {
+                    DB::alteration_message('... ... ... running ' . $value);
+                }
+
+                $totalDeleted += DB::affected_rows();
+                if ($this->verbose) {
+                    DB::alteration_message('... ... ... total deleted now ... ' . $totalDeleted);
+                }
             }
+            } else {
+                $delSQL = '
+                    DELETE FROM "' . $table . '_Versions"
+                    WHERE
+                        "Version" IN (' . implode(',', $this->toDelete[$this->getUniqueKey()]) . ')
+                        AND "RecordID" = ' . (int) $this->object->ID;
 
-            $totalDeleted += DB::affected_rows();
-            if ($this->verbose) {
-                DB::alteration_message('... ... ... total deleted now ... ' . $totalDeleted);
+                DB::query($delSQL);
+                if ($this->verbose) {
+                    DB::alteration_message('... ... ... running ' . $delSQL);
+                }
+
+                $totalDeleted += DB::affected_rows();
+                if ($this->verbose) {
+                    DB::alteration_message('... ... ... total deleted now ... ' . $totalDeleted);
+                }
             }
         }
 
