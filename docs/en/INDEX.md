@@ -20,15 +20,14 @@ Run all the pruning in one go using this command on the command line:
 ```
 vendor/bin/sake dev/tasks/prune-all-versioned-records
 ```
-You can run this task every night, or once an hour or whatever works for you. 
+You can run this task every night, or once an hour or whatever works for you. A cron job or similar is recommended. 
 
 
-OR browse to (not recommended):
+**OR** browse to (not recommended):
 
 ```
 http://www.mysite.com.nz/dev/tasks/prune-all-versioned-records
 ```
-
 
 
 # acknowledgement
