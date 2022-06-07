@@ -67,6 +67,11 @@ class RunForOneObject
      * @var bool
      */
     protected $dryRun = false;
+    /**
+     *
+     * @var array
+     */
+    protected $countPerTableRegister = [];
 
     /**
      * schema is:
@@ -170,19 +175,21 @@ class RunForOneObject
         // database tables relating to DataObject
         $queriedTables = $this->getTablesForClassName();
         foreach ($queriedTables as $table) {
-            if($this->dryRun === true) {
-                $select = '
-                    SELECT COUNT(ID) AS C FROM "' . $table . '_Versions"
-                    WHERE
-                        "Version" IN (' . implode(',', $this->toDelete[$this->getUniqueKey()]) . ')
-                        AND "RecordID" = ' . (int) $this->object->ID;
+            $selectOverallCountSQL = '
+                SELECT COUNT(ID) AS C FROM "' . $table . '_Versions"';
+            $overallCount = DB::query($selectOverallCountSQL)->value();
+            $selectToBeDeletedSQL = '
+                SELECT COUNT(ID) AS C FROM "' . $table . '_Versions"
+                WHERE
+                    "Version" IN (' . implode(',', $this->toDelete[$this->getUniqueKey()]) . ')
+                    AND "RecordID" = ' . (int) $this->object->ID;
 
-                $value = DB::query($select)->value();
-                if ($this->verbose) {
-                    DB::alteration_message('... ... ... running ' . $select);
-                    DB::alteration_message('... ... ... total rows to be deleted  ... ' . $value);
-                }
-            } else {
+            $toBeDeletedCount = DB::query($selectToBeDeletedSQL)->value();
+            if ($this->verbose) {
+                DB::alteration_message('... ... ... running ' . $select);
+                DB::alteration_message('... ... ... total rows to be deleted  ... ' . $toBeDeletedCount. ' of '.$overallCount);
+            }
+            if($this->dryRun === false) {
                 $delSQL = '
                     DELETE FROM "' . $table . '_Versions"
                     WHERE
@@ -190,12 +197,15 @@ class RunForOneObject
                         AND "RecordID" = ' . (int) $this->object->ID;
 
                 DB::query($delSQL);
-                $totalDeleted += DB::affected_rows();
+                $count = DB::affected_rows();
+                $totalDeleted += $count;
+                $overallCount -= $count;
                 if ($this->verbose) {
                     DB::alteration_message('... ... ... running ' . $delSQL);
                     DB::alteration_message('... ... ... total rows deleted ... ' . $totalDeleted);
                 }
             }
+            $this->addCountRegister($table, $overallCount);
         }
 
         return $totalDeleted;
@@ -304,4 +314,15 @@ class RunForOneObject
 
         return $this->tablesPerClassName[$this->object->ClassName];
     }
+
+    public function getCountRegister() : array
+    {
+        return $this->countPerTableRegister;
+    }
+
+    protected function addCountRegister(string $tableName, int $count) : void
+    {
+        $this->countPerTableRegister[$tableName] = $count;
+    }
+
 }

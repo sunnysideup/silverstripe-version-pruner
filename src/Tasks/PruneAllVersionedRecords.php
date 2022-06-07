@@ -57,9 +57,12 @@ class PruneAllVersionedRecords extends BuildTask
         $runObject = RunForOneObject::inst()
             ->setVerbose($this->verbose)
             ->setDryRun($this->dryRun);
-        DB::alteration_message('verbose: '.($this->verbose ? 'yes' : 'no'));
-        DB::alteration_message('dry run: '.($this->dryRun ? 'yes' : 'no'));
-        DB::alteration_message('limit per class: '.$this->limit);
+        DB::alteration_message('settings (set as parameters)');
+        DB::alteration_message('-------------------- ');
+        DB::alteration_message('verbose: '.($this->verbose ? 'yes' : 'no'), 'created');
+        DB::alteration_message('dry run: '.($this->dryRun ? 'yes' : 'no'), 'created');
+        DB::alteration_message('limit per class: '.$this->limit, 'created');
+        DB::alteration_message('-------------------- ');
         foreach ($classes as $className) {
             DB::alteration_message('... Looking at ' . $className);
             $objects = $this->getObjectsPerClassName($className);
@@ -78,6 +81,10 @@ class PruneAllVersionedRecords extends BuildTask
         }
 
         DB::alteration_message('Completed, pruned ' . $totalTotalDeleted . ' records');
+        $array = $runObject->getCountRegister();
+        foreach($array as $table => $count) {
+            DB::alteration_message($table.' has '.$count.' records left.');
+        }
     }
 
     protected function getObjectsPerClassName(string $className): DataList
