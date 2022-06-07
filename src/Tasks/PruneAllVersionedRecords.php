@@ -56,7 +56,6 @@ class PruneAllVersionedRecords extends BuildTask
         return $this;
     }
 
-
     /**
      * Prune all published DataObjects which are published according to config.
      *

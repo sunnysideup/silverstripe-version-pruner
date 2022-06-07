@@ -2,14 +2,12 @@
 
 namespace Sunnysideup\VersionPruner\Api;
 
+use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Dev\BuildTask;
-use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DB;
-use SilverStripe\Versioned\Versioned;
-use SilverStripe\CMS\Model\SiteTree;
 
 class PruneAllVersionedRecordsBasic extends BuildTask
 {
@@ -71,7 +69,5 @@ class PruneAllVersionedRecordsBasic extends BuildTask
         $oldestRecord = DB::query('SELECT MIN(LastEdited) FROM SiteTree_Versions')->value();
         $newestRecord = DB::query('SELECT MAX(LastEdited) FROM SiteTree_Versions')->value();
         DB::alteration_message("Total pages: {$numberOfRecords}, oldest record: {$oldestRecord}, newest record: {$newestRecord}", 'created');
-
     }
-
 }
