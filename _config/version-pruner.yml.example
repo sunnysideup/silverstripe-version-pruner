@@ -1,37 +1,35 @@
 ---
-Name: 'VersionPruner'
-After: framework
+Name: 'version_pruner'
 ---
 
 # note: order is important - more specific classes that extend another should come last.
-# 
+#
 # e.g. SiteTree first and then Page then HomePage
 #
 # set up like this, it means that the HomePage on your website will be pruned as a HomePage
 # and not as a SiteTree.
 #
-# default, listed here first, will become the least import, least likely to be selected. 
+# default, listed here first, will become the least import, least likely to be selected.
 
 Sunnysideup\VersionPruner\Api\RunForOneObject:
   templates:
-  
+
     'default':
         Sunnysideup\VersionPruner\PruningTemplates\BasedOnTimeScale: []
 
     # you can set any variables in the arrays after the class
     SilverStripe\CMS\Model\SiteTree:
-        Sunnysideup\VersionPruner\PruningTemplates\Drafts: 
+        Sunnysideup\VersionPruner\PruningTemplates\Drafts:
             keepDrafts: 50
         Sunnysideup\VersionPruner\PruningTemplates\SiteTreeVersioningTemplate: []
 
     SilverStripe\Assets\Files:
         Sunnysideup\VersionPruner\PruningTemplates\DeleteFiles: []
         Sunnysideup\VersionPruner\PruningTemplates\BasedOnTimeScale: []
-        
+
     # you can also make your own pruners
     Client\Website\Model\MoreSpecificPage:
-        Sunnysideup\VersionPruner\PruningTemplates\MySiteTreeVersioningTemplate: []        
-        
-    Client\Website\Model\ExtendsMoreSpecificPage:
-        Sunnysideup\VersionPruner\PruningTemplates\SiteTreeVersioningTemplate: []      
+        Sunnysideup\VersionPruner\PruningTemplates\MySiteTreeVersioningTemplate: []
 
+    Client\Website\Model\ExtendsMoreSpecificPage:
+        Sunnysideup\VersionPruner\PruningTemplates\SiteTreeVersioningTemplate: []
