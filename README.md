@@ -1,8 +1,9 @@
-# Silverstripe Version Pruner module
-
-## tl;dr
+# tl;dr
 
 see: [Developer Docs](docs/en/INDEX.md)
+
+# Silverstripe Version Pruner module
+
 
 [![Build Status](https://travis-ci.org/sunnysideup/silverstripe-version-pruner.svg?branch=master)](https://travis-ci.org/sunnysideup/silverstripe-version-pruner)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/sunnysideup/silverstripe-version-pruner/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/sunnysideup/silverstripe-version-pruner/?branch=master)
