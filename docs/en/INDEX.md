@@ -1,6 +1,6 @@
 # how it works
 
-There is a [build task](https://github.com/sunnysideup/silverstripe-version-pruner/blob/master/src/Tasks/PruneAllVersionedRecords.php) that runs through all the versioned clases in your database.
+There is a [build task](https://github.com/sunnysideup/silverstripe-version-pruner/blob/master/src/Tasks/PruneAllVersionedRecords.php) that runs through all the versioned classes in your database.
 
 For each versioned class (e.g. `SiteTree`, `File`, etc...), it takes up to 500 random records (or extend build task to change that). 
 
