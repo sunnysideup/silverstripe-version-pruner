@@ -57,6 +57,9 @@ class PruneAllVersionedRecords extends BuildTask
         $runObject = RunForOneObject::inst()
             ->setVerbose($this->verbose)
             ->setDryRun($this->dryRun);
+        DB::alteration_message('verbose: '.($this->verbose ? 'yes' : 'no'));
+        DB::alteration_message('dry run: '.($this->dryRun ? 'yes' : 'no'));
+        DB::alteration_message('limit per class: '.$this->limit);
         foreach ($classes as $className) {
             DB::alteration_message('... Looking at ' . $className);
             $objects = $this->getObjectsPerClassName($className);
