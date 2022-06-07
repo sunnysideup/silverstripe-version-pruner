@@ -28,6 +28,9 @@ You can run this task every night, or once an hour or whatever works for you. A 
 ```
 http://www.mysite.com.nz/dev/tasks/prune-all-versioned-records
 ```
+# how to customise
+
+You can set up your own pruner templates based on the ones provided [here](https://github.com/sunnysideup/silverstripe-version-pruner/tree/master/src/PruningTemplates) . 
 
 
 # acknowledgement
