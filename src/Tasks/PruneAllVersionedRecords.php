@@ -35,6 +35,28 @@ class PruneAllVersionedRecords extends BuildTask
      */
     private static $segment = 'prune-all-versioned-records';
 
+    public function setVerbose(?bool $verbose = true): self
+    {
+        $this->verbose = $verbose;
+
+        return $this;
+    }
+
+    public function setDryRun(?bool $dryRun = true): self
+    {
+        $this->dryRun = $dryRun;
+
+        return $this;
+    }
+
+    public function setLimit(int $limit): self
+    {
+        $this->limit = $limit;
+
+        return $this;
+    }
+
+
     /**
      * Prune all published DataObjects which are published according to config.
      *
@@ -43,13 +65,13 @@ class PruneAllVersionedRecords extends BuildTask
     public function run($request)
     {
         $classes = $this->getAllVersionedDataClasses();
-        if ($request->requestVar('verbose')) {
+        if ($request && $request->requestVar('verbose')) {
             $this->verbose = $request->requestVar('verbose');
         }
-        if ($request->requestVar('dry')) {
+        if ($request && $request->requestVar('dry')) {
             $this->dryRun = $request->requestVar('dry');
         }
-        if ($request->requestVar('limit')) {
+        if ($request && $request->requestVar('limit')) {
             $this->limit = $request->requestVar('limit');
         }
         DB::alteration_message('Pruning all DataObjects with a maximum of ' . self::MAX_ITEMS_PER_CLASS . ' per class.');
