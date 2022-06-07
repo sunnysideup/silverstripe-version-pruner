@@ -132,23 +132,9 @@ class RunForOneObject
     public function deleteSuperfluousVersions($object): int
     {
         $this->object = $object;
-        $this->verbose = $verbose;
-        if (false === $this->hasStages()) {
-            if ($this->verbose) {
-                DB::alteration_message('... ... ... Error, no stages', 'deleted');
-            }
-
+        if(! $this->isValidObject()) {
             return 0;
         }
-
-        if (false === $this->object->isLiveVersion()) {
-            if ($this->verbose) {
-                DB::alteration_message('... ... ... Error, not a live version', 'deleted');
-            }
-
-            return 0;
-        }
-
         // array of version IDs to delete
         // IMPORTANT
         $this->toDelete[$this->getUniqueKey()] = [];
@@ -224,10 +210,13 @@ class RunForOneObject
     public function getTemplatesDescription($object): array
     {
         $array = [];
-        $myTemplates = $this->findBestSuitedTemplates();
-        foreach ($myTemplates as $className => $options) {
-            $runner = new $className($this->object, $this->toDelete[$this->getUniqueKey()]);
-            $array[] =  $runner->getTitle() . ': ' . $runner->getDescription();
+        $this->object = $object;
+        if($this->isValidObject()) {
+            $myTemplates = $this->findBestSuitedTemplates();
+            foreach ($myTemplates as $className => $options) {
+                $runner = new $className($this->object, []);
+                $array[] =  $runner->getTitle() . ': ' . $runner->getDescription();
+            }
         }
 
         return $array;
@@ -243,16 +232,19 @@ class RunForOneObject
 
     protected function hasStages(): bool
     {
-        $oldMode = Versioned::get_reading_mode();
-        if ('Stage.Stage' !== $oldMode) {
-            Versioned::set_reading_mode('Stage.Stage');
-        }
+        $hasStages = false;
+        if($this->object->hasMethod('hasStages')) {
+            $oldMode = Versioned::get_reading_mode();
+            if ('Stage.Stage' !== $oldMode) {
+                Versioned::set_reading_mode('Stage.Stage');
+            }
 
-        $hasStages = (bool) $this->object->hasStages();
-        if ('Stage.Stage' !== $oldMode) {
-            Versioned::set_reading_mode($oldMode);
-        }
+            $hasStages = (bool) $this->object->hasStages();
+            if ('Stage.Stage' !== $oldMode) {
+                Versioned::set_reading_mode($oldMode);
+            }
 
+        }
         return $hasStages;
     }
 
@@ -273,6 +265,30 @@ class RunForOneObject
         }
 
         return $this->templatesPerClassName[$this->object->ClassName];
+    }
+
+    protected function isValidObject() : bool
+    {
+        if (false === $this->hasStages()) {
+            if ($this->verbose) {
+                DB::alteration_message('... ... ... Error, no stages', 'deleted');
+            }
+
+            return false;
+        }
+
+        if(! $this->object->hasMethod('isLiveVersion')) {
+            return false;
+        }
+        if (false === $this->object->isLiveVersion()) {
+            if ($this->verbose) {
+                DB::alteration_message('... ... ... Error, not a live version', 'deleted');
+            }
+
+            return false;
+        }
+        return $this->object && $this->object->exists();
+
     }
 
     protected function getTablesForClassName(): array

@@ -35,26 +35,31 @@ class PruneAllVersionedRecordsReviewTemplates extends BuildTask
      */
     public function run($request)
     {
-        $allClasses = ClassInfo::subclassesFor(DataObject::class);
-        $runner = RunForOneObject::inst()
+        $allClasses = ClassInfo::subclassesFor(DataObject::class, false);
+        $runner = RunForOneObject::inst();
+        Versioned::set_stage(Versioned::DRAFT);
         foreach ($allClasses as $className) {
             $name = Injector::inst()->get($className)->i18n_singular_name();
             $count = $this->getObjectCountPerClassName($className);
             if($count) {
                 $object = DataObject::get_one($className);
-                DB::alteration_message($name .' ('.$count.' records) - '.$runner->getTemplateDescription($this->object);
+                if($object) {
+                    $array = $runner->getTemplatesDescription($object);
+                    if(count($array)) {
+                        DB::alteration_message($name .' ('.$count.' records) '.$className);
+                        DB::alteration_message('... '.$className);
+                        foreach($array as $string) {
+                            DB::alteration_message('... ... '.$string);
+                        }
+                    }
+                }
             }
-            DB::alteration_message(=)
         }
     }
 
     protected function getObjectCountPerClassName(string $className): int
     {
-        return Versioned::get_by_stage($className, Versioned::DRAFT)
-            ->sort(DB::get_conn()->random() . ' ASC')
-            ->limit()
-            ->count()
-        ;
+        return $className::get()->limit(100000)->count();
     }
 
 
