@@ -29,6 +29,11 @@ You can run this task every night or whatever works for you. A cron job or simil
 http://www.mysite.com.nz/dev/tasks/prune-all-versioned-records
 ```
 
+# how to review templates
+```shell
+vendor/bin/sake dev/tasks/prune-all-versioned-records-review-templates
+```
+
 # how to do a dry run
 ```shell
 vendor/bin/sake dev/tasks/prune-all-versioned-records verbose=1 dry=1 limit=5
