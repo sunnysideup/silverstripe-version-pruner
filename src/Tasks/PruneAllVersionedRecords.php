@@ -88,7 +88,7 @@ class PruneAllVersionedRecords extends BuildTask
     /**
      * Get all versioned database classes.
      */
-    private function getAllVersionedDataClasses(): array
+    protected function getAllVersionedDataClasses(): array
     {
         $allClasses = ClassInfo::subclassesFor(DataObject::class);
         $versionedClasses = [];
@@ -106,7 +106,10 @@ class PruneAllVersionedRecords extends BuildTask
                 $versionedClasses[$className] = $className;
             }
         }
-
         return $versionedClasses;
     }
+
+
+
+
 }

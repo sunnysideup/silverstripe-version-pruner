@@ -127,9 +127,9 @@ class RunForOneObject
      * returns the total number deleted.
      *
      * @param DataObject $object
-     * @param bool       $verbose
+     * @return int number of deletions
      */
-    public function deleteSuperfluousVersions($object, ?bool $verbose = false): int
+    public function deleteSuperfluousVersions($object): int
     {
         $this->object = $object;
         $this->verbose = $verbose;
@@ -213,6 +213,24 @@ class RunForOneObject
         }
 
         return $totalDeleted;
+    }
+
+    /**
+     * returns the total number deleted.
+     *
+     * @param DataObject $object
+     * @param bool       $verbose
+     */
+    public function getTemplatesDescription($object): array
+    {
+        $array = [];
+        $myTemplates = $this->findBestSuitedTemplates();
+        foreach ($myTemplates as $className => $options) {
+            $runner = new $className($this->object, $this->toDelete[$this->getUniqueKey()]);
+            $array[] =  $runner->getTitle() . ': ' . $runner->getDescription();
+        }
+
+        return $array;
     }
 
     /**
