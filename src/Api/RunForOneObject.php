@@ -117,7 +117,7 @@ class RunForOneObject
         return $this;
     }
 
-    public function setDry(?bool $dryRun = true) : self
+    public function setDryRun(?bool $dryRun = true) : self
     {
         $this->dryRun = $dryRun;
         return $this;
@@ -193,12 +193,8 @@ class RunForOneObject
 
                 $value = DB::query($select)->value();
                 if ($this->verbose) {
-                    DB::alteration_message('... ... ... running ' . $value);
-                }
-
-                $totalDeleted += DB::affected_rows();
-                if ($this->verbose) {
-                    DB::alteration_message('... ... ... total deleted now ... ' . $totalDeleted);
+                    DB::alteration_message('... ... ... running ' . $select);
+                    DB::alteration_message('... ... ... total rows to be deleted  ... ' . $value);
                 }
             }
             } else {
@@ -209,13 +205,10 @@ class RunForOneObject
                         AND "RecordID" = ' . (int) $this->object->ID;
 
                 DB::query($delSQL);
-                if ($this->verbose) {
-                    DB::alteration_message('... ... ... running ' . $delSQL);
-                }
-
                 $totalDeleted += DB::affected_rows();
                 if ($this->verbose) {
-                    DB::alteration_message('... ... ... total deleted now ... ' . $totalDeleted);
+                    DB::alteration_message('... ... ... running ' . $delSQL);
+                    DB::alteration_message('... ... ... total rows deleted ... ' . $totalDeleted);
                 }
             }
         }

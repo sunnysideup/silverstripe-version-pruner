@@ -23,6 +23,11 @@ class PruneAllVersionedRecords extends BuildTask
     protected $title = 'Prune all versioned records';
 
     protected $description = 'Go through all dataobjects that are versioned and prune them as per schema provided.';
+    protected $limit = self::MAX_ITEMS_PER_CLASS;
+
+    protected $verbose = false;
+
+    protected $dryRun = false;
 
     /**
      * @var string
@@ -37,9 +42,17 @@ class PruneAllVersionedRecords extends BuildTask
     public function run($request)
     {
         $classes = $this->getAllVersionedDataClasses();
+        if($request->requestVar('verbose'))) {
+            $this->verbose = $request->requestVar('verbose');
+        }
+        if($request->requestVar('dry'))) {
+            $this->dryRun = $request->requestVar('dry');
+        }
         DB::alteration_message('Pruning all DataObjects with a maximum of ' . self::MAX_ITEMS_PER_CLASS . ' per class.');
         $totalTotalDeleted = 0;
-        $runObject = RunForOneObject::inst();
+        $runObject = RunForOneObject::inst()
+            ->setVerbose($this->verbose)
+            ->setDryRun($this->dryRun);
         foreach ($classes as $className) {
             DB::alteration_message('... Looking at ' . $className);
             $objects = $this->getObjectsPerClassName($className);
