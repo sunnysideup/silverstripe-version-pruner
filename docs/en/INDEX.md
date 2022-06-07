@@ -1,4 +1,4 @@
-# how it works:
+# how it works
 
 There is a [build task](https://github.com/sunnysideup/silverstripe-version-pruner/blob/master/src/Tasks/PruneAllVersionedRecords.php) that runs through all the versioned clases in your database.
 
