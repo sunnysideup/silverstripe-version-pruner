@@ -31,7 +31,7 @@ http://www.mysite.com.nz/dev/tasks/prune-all-versioned-records
 
 # how to do a dry run
 ```shell
-vendor/bin/sake dev/tasks/prune-all-versioned-records verbose=1 dry=1
+vendor/bin/sake dev/tasks/prune-all-versioned-records verbose=1 dry=1 limit=5
 ```
 
 

@@ -23,6 +23,7 @@ class PruneAllVersionedRecords extends BuildTask
     protected $title = 'Prune all versioned records';
 
     protected $description = 'Go through all dataobjects that are versioned and prune them as per schema provided.';
+
     protected $limit = self::MAX_ITEMS_PER_CLASS;
 
     protected $verbose = false;
@@ -47,6 +48,9 @@ class PruneAllVersionedRecords extends BuildTask
         }
         if($request->requestVar('dry')) {
             $this->dryRun = $request->requestVar('dry');
+        }
+        if($request->requestVar('limit')) {
+            $this->limit = $request->requestVar('limit');
         }
         DB::alteration_message('Pruning all DataObjects with a maximum of ' . self::MAX_ITEMS_PER_CLASS . ' per class.');
         $totalTotalDeleted = 0;
@@ -77,7 +81,7 @@ class PruneAllVersionedRecords extends BuildTask
     {
         return Versioned::get_by_stage($className, Versioned::DRAFT)
             ->sort(DB::get_conn()->random() . ' ASC')
-            ->limit(self::MAX_ITEMS_PER_CLASS)
+            ->limit($this->limit)
         ;
     }
 
