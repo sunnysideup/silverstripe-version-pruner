@@ -47,6 +47,7 @@ class PruneAllVersionedRecordsBasic extends BuildTask
                 $classTables[] = DataObject::getSchema()->tableName($class);
             }
         }
+
         $classTables = array_unique($classTables);
         $lastYear = date('Y-m-d', strtotime('-3 months'));
         DB::alteration_message("Looking for all versions that are older than {$lastYear}", 'created');
@@ -61,10 +62,12 @@ class PruneAllVersionedRecordsBasic extends BuildTask
                 $leftJoin = " LEFT JOIN SiteTree_Versions ON {$tableName}.RecordID = SiteTree_Versions.RecordID AND {$tableName}.Version = SiteTree_Versions.Version ";
                 $joinWhere = ' SiteTree_Versions.RecordID IS NULL';
             }
+
             DB::alteration_message("DELETING ALL ENTRIES FROM {$tableName}");
             $sql = "DELETE {$tableName}.* FROM \"{$tableName}\" {$leftJoin} WHERE {$joinWhere};";
             DB::query($sql);
         }
+
         $numberOfRecords = DB::query('SELECT COUNT(ID) FROM SiteTree_Versions')->value();
         $oldestRecord = DB::query('SELECT MIN(LastEdited) FROM SiteTree_Versions')->value();
         $newestRecord = DB::query('SELECT MAX(LastEdited) FROM SiteTree_Versions')->value();

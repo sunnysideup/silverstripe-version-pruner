@@ -67,12 +67,15 @@ class PruneAllVersionedRecords extends BuildTask
         if ($request && $request->requestVar('verbose')) {
             $this->verbose = $request->requestVar('verbose');
         }
+
         if ($request && $request->requestVar('dry')) {
             $this->dryRun = $request->requestVar('dry');
         }
+
         if ($request && $request->requestVar('limit')) {
             $this->limit = $request->requestVar('limit');
         }
+
         DB::alteration_message('Pruning all DataObjects with a maximum of ' . self::MAX_ITEMS_PER_CLASS . ' per class.');
         $totalTotalDeleted = 0;
         $runObject = RunForOneObject::inst()

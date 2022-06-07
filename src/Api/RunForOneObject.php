@@ -65,6 +65,7 @@ class RunForOneObject
      * @var bool
      */
     protected $dryRun = false;
+
     /**
      * @var array
      */
@@ -140,6 +141,7 @@ class RunForOneObject
         if (! $this->isValidObject()) {
             return 0;
         }
+
         // array of version IDs to delete
         // IMPORTANT
         $this->toDelete[$this->getUniqueKey()] = [];
@@ -175,21 +177,26 @@ class RunForOneObject
         // database tables relating to DataObject
         $queriedTables = $this->getTablesForClassName();
         foreach ($queriedTables as $table) {
-            $selectOverallCountSQL = '
-                SELECT COUNT(ID) AS C FROM "' . $table . '_Versions"';
-            $overallCount = DB::query($selectOverallCountSQL)->value();
-            $selectToBeDeletedSQL = '
-                SELECT COUNT(ID) AS C FROM "' . $table . '_Versions"
-                WHERE
-                    "Version" IN (' . implode(',', $this->toDelete[$this->getUniqueKey()]) . ')
-                    AND "RecordID" = ' . (int) $this->object->ID;
-
-            $toBeDeletedCount = DB::query($selectToBeDeletedSQL)->value();
-            if ($this->verbose) {
-                DB::alteration_message('... ... ... running ' . $select);
-                DB::alteration_message('... ... ... total rows to be deleted  ... ' . $toBeDeletedCount . ' of ' . $overallCount);
+            $overallCount = $this->countPerTableRegister[$table] ?? -1;
+            if($overallCount === -1) {
+                $selectOverallCountSQL = '
+                    SELECT COUNT(ID) AS C FROM "' . $table . '_Versions"';
+                $overallCount = DB::query($selectOverallCountSQL)->value();
             }
-            if (false === $this->dryRun) {
+            if (true === $this->dryRun) {
+                $selectToBeDeletedSQL = '
+                    SELECT COUNT(ID) AS C FROM "' . $table . '_Versions"
+                    WHERE
+                        "Version" IN (' . implode(',', $this->toDelete[$this->getUniqueKey()]) . ')
+                        AND "RecordID" = ' . (int) $this->object->ID;
+
+                $toBeDeletedCount = DB::query($selectToBeDeletedSQL)->value();
+                $totalDeleted += $toBeDeletedCount;
+                if ($this->verbose) {
+                    DB::alteration_message('... ... ... running ' . $select);
+                    DB::alteration_message('... ... ... total rows to be deleted  ... ' . $toBeDeletedCount . ' of ' . $overallCount);
+                }
+            } else {
                 $delSQL = '
                     DELETE FROM "' . $table . '_Versions"
                     WHERE
@@ -205,6 +212,7 @@ class RunForOneObject
                     DB::alteration_message('... ... ... total rows deleted ... ' . $totalDeleted);
                 }
             }
+
             $this->addCountRegister($table, $overallCount);
         }
 
@@ -295,6 +303,7 @@ class RunForOneObject
         if (! $this->object->hasMethod('isLiveVersion')) {
             return false;
         }
+
         if (false === $this->object->isLiveVersion()) {
             if ($this->verbose) {
                 DB::alteration_message('... ... ... Error, not a live version', 'deleted');
