@@ -60,7 +60,7 @@ class PruneAllVersionedRecordsBasic extends BuildTask
                 $leftJoin = '';
             } else {
                 // now we delete the non-linking ones
-                $leftJoin = " LEFT JOIN SiteTree_Versions ON {$tableName}.RecordID = SiteTree_Versions.RecordID ";
+                $leftJoin = " LEFT JOIN SiteTree_Versions ON {$tableName}.RecordID = SiteTree_Versions.RecordID AND {$tableName}.Version = SiteTree_Versions.Version ";
                 $joinWhere = ' SiteTree_Versions.RecordID IS NULL';
             }
             DB::alteration_message("DELETING ALL ENTRIES FROM {$tableName}");
