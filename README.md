@@ -1,4 +1,10 @@
+# tl;dr
+
+see: [Developer Docs](docs/en/INDEX.md)
+
 # Silverstripe Version Pruner module
+
+
 [![Build Status](https://travis-ci.org/sunnysideup/silverstripe-version-pruner.svg?branch=master)](https://travis-ci.org/sunnysideup/silverstripe-version-pruner)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/sunnysideup/silverstripe-version-pruner/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/sunnysideup/silverstripe-version-pruner/?branch=master)
 [![codecov.io](https://codecov.io/github/sunnysideup/silverstripe-version-pruner/coverage.svg?branch=master)](https://codecov.io/github/sunnysideup/silverstripe-version-pruner?branch=master)
