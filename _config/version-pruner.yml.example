@@ -3,9 +3,14 @@ Name: 'VersionPruner'
 After: framework
 ---
 
-# note: order is important - classes that extend another should come last - 
+# note: order is important - more specific classes that extend another should come last.
+# 
 # e.g. SiteTree first and then Page then HomePage
-# default is the last resort.
+#
+# set up like this, it means that the HomePage on your website will be pruned as a HomePage
+# and not as a SiteTree.
+#
+# default, listed here first, will become the least import, least likely to be selected. 
 
 Sunnysideup\VersionPruner\Api\RunForOneObject:
   templates:
