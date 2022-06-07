@@ -2,7 +2,7 @@
 
 There is a [build task](https://github.com/sunnysideup/silverstripe-version-pruner/blob/master/src/Tasks/PruneAllVersionedRecords.php) that runs through all the versioned classes in your database.
 
-For each versioned class (e.g. `SiteTree`, `File`, etc...), it takes up to 500 random records (or extend build task to change that). 
+For each versioned class (e.g. `SiteTree`, `File`, etc...), it takes up to 500 random records (extend build task to change that). 
 
 For each of these random records, it passes it to the [RunForOneObject](https://github.com/sunnysideup/silverstripe-version-pruner/blob/master/src/Api/RunForOneObject.php) runner class. 
 
