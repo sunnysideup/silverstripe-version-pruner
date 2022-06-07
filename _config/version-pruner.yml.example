@@ -13,16 +13,20 @@ Sunnysideup\VersionPruner\Api\RunForOneObject:
     'default':
         Sunnysideup\VersionPruner\PruningTemplates\BasedOnTimeScale: []
 
+    # you can set any variables in the arrays after the class
     SilverStripe\CMS\Model\SiteTree:
-        Sunnysideup\VersionPruner\PruningTemplates\Drafts: []
+        Sunnysideup\VersionPruner\PruningTemplates\Drafts: 
+            keepDrafts: 50
         Sunnysideup\VersionPruner\PruningTemplates\SiteTreeVersioningTemplate: []
-        
-    Client\Website\Model\MoreSpecificPage:
-        Sunnysideup\VersionPruner\PruningTemplates\SiteTreeVersioningTemplate: []        
-        
-    Client\Website\Model\ExtendsMoreSpecificPage:
-        Sunnysideup\VersionPruner\PruningTemplates\SiteTreeVersioningTemplate: []      
 
     SilverStripe\Assets\Files:
         Sunnysideup\VersionPruner\PruningTemplates\DeleteFiles: []
         Sunnysideup\VersionPruner\PruningTemplates\BasedOnTimeScale: []
+        
+    # you can also make your own pruners
+    Client\Website\Model\MoreSpecificPage:
+        Sunnysideup\VersionPruner\PruningTemplates\MySiteTreeVersioningTemplate: []        
+        
+    Client\Website\Model\ExtendsMoreSpecificPage:
+        Sunnysideup\VersionPruner\PruningTemplates\SiteTreeVersioningTemplate: []      
+
