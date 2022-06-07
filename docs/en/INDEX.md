@@ -13,10 +13,6 @@ By default, a [few pruners](https://github.com/sunnysideup/silverstripe-version-
 _the further back in history you go, the more versions are pruned - e.g. we keep one every two hours for the last 24 hours, and one for every year once you go a lot further back in time._ 
 
 
-# how to configure
-
-see [example](https://github.com/sunnysideup/silverstripe-version-pruner/blob/master/_config/version-pruner.yml.example)
-
 # how to run
 
 Run all the pruning in one go using this command on the command line:
@@ -32,6 +28,12 @@ You can run this task every night, or once an hour or whatever works for you. A 
 ```
 http://www.mysite.com.nz/dev/tasks/prune-all-versioned-records
 ```
+
+# how to configure
+
+see [example](https://github.com/sunnysideup/silverstripe-version-pruner/blob/master/_config/version-pruner.yml.example)
+
+
 # how to customise
 
 You can set up your own pruner templates based on the ones provided [here](https://github.com/sunnysideup/silverstripe-version-pruner/tree/master/src/PruningTemplates). 
