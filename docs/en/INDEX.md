@@ -10,7 +10,7 @@ This runner can be configured using static variables (see [yml example file](htt
 
 By default, a [few pruners](https://github.com/sunnysideup/silverstripe-version-pruner/tree/master/src/PruningTemplates) have been included and set up for classes like SiteTree and File.  For any class, you can combine them as you see fit. The [default pruner class](https://github.com/sunnysideup/silverstripe-version-pruner/blob/master/src/PruningTemplates/BasedOnTimeScale.php) prunes based on time, similar to many backup programs: 
 
-_the further back in history you go, the more versions are pruned - e.g. we keep one every two hours for the last 24 hours, and one for every year once you go a lot further back in time. 
+_the further back in history you go, the more versions are pruned - e.g. we keep one every two hours for the last 24 hours, and one for every year once you go a lot further back in time._ 
 
 
 # how to configure
