@@ -57,18 +57,15 @@ class RunForOneObject
     protected $templatesPerClassName = [];
 
     /**
-     *
      * @var bool
      */
     protected $verbose = false;
 
     /**
-     *
      * @var bool
      */
     protected $dryRun = false;
     /**
-     *
      * @var array
      */
     protected $countPerTableRegister = [];
@@ -116,15 +113,17 @@ class RunForOneObject
         return Injector::inst()->get(static::class);
     }
 
-    public function setVerbose(?bool $verbose = true) : self
+    public function setVerbose(?bool $verbose = true): self
     {
         $this->verbose = $verbose;
+
         return $this;
     }
 
-    public function setDryRun(?bool $dryRun = true) : self
+    public function setDryRun(?bool $dryRun = true): self
     {
         $this->dryRun = $dryRun;
+
         return $this;
     }
 
@@ -132,12 +131,13 @@ class RunForOneObject
      * returns the total number deleted.
      *
      * @param DataObject $object
+     *
      * @return int number of deletions
      */
     public function deleteSuperfluousVersions($object): int
     {
         $this->object = $object;
-        if(! $this->isValidObject()) {
+        if (! $this->isValidObject()) {
             return 0;
         }
         // array of version IDs to delete
@@ -187,9 +187,9 @@ class RunForOneObject
             $toBeDeletedCount = DB::query($selectToBeDeletedSQL)->value();
             if ($this->verbose) {
                 DB::alteration_message('... ... ... running ' . $select);
-                DB::alteration_message('... ... ... total rows to be deleted  ... ' . $toBeDeletedCount. ' of '.$overallCount);
+                DB::alteration_message('... ... ... total rows to be deleted  ... ' . $toBeDeletedCount . ' of ' . $overallCount);
             }
-            if($this->dryRun === false) {
+            if (false === $this->dryRun) {
                 $delSQL = '
                     DELETE FROM "' . $table . '_Versions"
                     WHERE
@@ -221,15 +221,20 @@ class RunForOneObject
     {
         $array = [];
         $this->object = $object;
-        if($this->isValidObject()) {
+        if ($this->isValidObject()) {
             $myTemplates = $this->findBestSuitedTemplates();
             foreach ($myTemplates as $className => $options) {
                 $runner = new $className($this->object, []);
-                $array[] =  $runner->getTitle() . ': ' . $runner->getDescription();
+                $array[] = $runner->getTitle() . ': ' . $runner->getDescription();
             }
         }
 
         return $array;
+    }
+
+    public function getCountRegister(): array
+    {
+        return $this->countPerTableRegister;
     }
 
     /**
@@ -243,7 +248,7 @@ class RunForOneObject
     protected function hasStages(): bool
     {
         $hasStages = false;
-        if($this->object->hasMethod('hasStages')) {
+        if ($this->object->hasMethod('hasStages')) {
             $oldMode = Versioned::get_reading_mode();
             if ('Stage.Stage' !== $oldMode) {
                 Versioned::set_reading_mode('Stage.Stage');
@@ -253,8 +258,8 @@ class RunForOneObject
             if ('Stage.Stage' !== $oldMode) {
                 Versioned::set_reading_mode($oldMode);
             }
-
         }
+
         return $hasStages;
     }
 
@@ -277,7 +282,7 @@ class RunForOneObject
         return $this->templatesPerClassName[$this->object->ClassName];
     }
 
-    protected function isValidObject() : bool
+    protected function isValidObject(): bool
     {
         if (false === $this->hasStages()) {
             if ($this->verbose) {
@@ -287,7 +292,7 @@ class RunForOneObject
             return false;
         }
 
-        if(! $this->object->hasMethod('isLiveVersion')) {
+        if (! $this->object->hasMethod('isLiveVersion')) {
             return false;
         }
         if (false === $this->object->isLiveVersion()) {
@@ -297,8 +302,8 @@ class RunForOneObject
 
             return false;
         }
-        return $this->object && $this->object->exists();
 
+        return $this->object && $this->object->exists();
     }
 
     protected function getTablesForClassName(): array
@@ -315,14 +320,8 @@ class RunForOneObject
         return $this->tablesPerClassName[$this->object->ClassName];
     }
 
-    public function getCountRegister() : array
-    {
-        return $this->countPerTableRegister;
-    }
-
-    protected function addCountRegister(string $tableName, int $count) : void
+    protected function addCountRegister(string $tableName, int $count): void
     {
         $this->countPerTableRegister[$tableName] = $count;
     }
-
 }

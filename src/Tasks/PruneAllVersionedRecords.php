@@ -43,25 +43,26 @@ class PruneAllVersionedRecords extends BuildTask
     public function run($request)
     {
         $classes = $this->getAllVersionedDataClasses();
-        if($request->requestVar('verbose')) {
+        if ($request->requestVar('verbose')) {
             $this->verbose = $request->requestVar('verbose');
         }
-        if($request->requestVar('dry')) {
+        if ($request->requestVar('dry')) {
             $this->dryRun = $request->requestVar('dry');
         }
-        if($request->requestVar('limit')) {
+        if ($request->requestVar('limit')) {
             $this->limit = $request->requestVar('limit');
         }
         DB::alteration_message('Pruning all DataObjects with a maximum of ' . self::MAX_ITEMS_PER_CLASS . ' per class.');
         $totalTotalDeleted = 0;
         $runObject = RunForOneObject::inst()
             ->setVerbose($this->verbose)
-            ->setDryRun($this->dryRun);
+            ->setDryRun($this->dryRun)
+        ;
         DB::alteration_message('settings (set as parameters)');
         DB::alteration_message('-------------------- ');
-        DB::alteration_message('verbose: '.($this->verbose ? 'yes' : 'no'), 'created');
-        DB::alteration_message('dry run: '.($this->dryRun ? 'yes' : 'no'), 'created');
-        DB::alteration_message('limit per class: '.$this->limit, 'created');
+        DB::alteration_message('verbose: ' . ($this->verbose ? 'yes' : 'no'), 'created');
+        DB::alteration_message('dry run: ' . ($this->dryRun ? 'yes' : 'no'), 'created');
+        DB::alteration_message('limit per class: ' . $this->limit, 'created');
         DB::alteration_message('-------------------- ');
         foreach ($classes as $className) {
             DB::alteration_message('... Looking at ' . $className);
@@ -82,8 +83,8 @@ class PruneAllVersionedRecords extends BuildTask
 
         DB::alteration_message('Completed, pruned ' . $totalTotalDeleted . ' records');
         $array = $runObject->getCountRegister();
-        foreach($array as $table => $count) {
-            DB::alteration_message($table.' has '.$count.' records left.');
+        foreach ($array as $table => $count) {
+            DB::alteration_message($table . ' has ' . $count . ' records left.');
         }
     }
 
@@ -116,10 +117,7 @@ class PruneAllVersionedRecords extends BuildTask
                 $versionedClasses[$className] = $className;
             }
         }
+
         return $versionedClasses;
     }
-
-
-
-
 }
