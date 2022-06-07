@@ -196,7 +196,6 @@ class RunForOneObject
                     DB::alteration_message('... ... ... running ' . $select);
                     DB::alteration_message('... ... ... total rows to be deleted  ... ' . $value);
                 }
-            }
             } else {
                 $delSQL = '
                     DELETE FROM "' . $table . '_Versions"
