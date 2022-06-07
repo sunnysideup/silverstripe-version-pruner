@@ -309,6 +309,15 @@ class RunForOneObject
     protected function getTablesForClassName(): array
     {
         if (empty($this->tablesPerClassName[$this->object->ClassName])) {
+            // $classTables = []
+            // $allClasses = ClassInfo::subclassesFor($this->object->ClassName, true);
+            // foreach ($allClasses as $class) {
+            //     if (DataObject::getSchema()->classHasTable($class)) {
+            //         $classTables[] = DataObject::getSchema()->tableName($class);
+            //     }
+            // }
+            // $this->tablesPerClassName[$this->object->ClassName] = array_unique($classTables);
+
             $srcQuery = DataList::create($this->object->ClassName)
                 ->filter('ID', $this->object->ID)
                 ->dataQuery()
