@@ -1,6 +1,6 @@
 <?php
 
-namespace Sunnysideup\VersionPruner\Api;
+namespace Sunnysideup\VersionPruner\Tasks;
 
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Config;
@@ -9,6 +9,8 @@ use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DB;
 use SilverStripe\Versioned\Versioned;
+
+use Sunnysideup\VersionPruner\Api\RunForOneObject;
 
 class PruneAllVersionedRecords extends BuildTask
 {

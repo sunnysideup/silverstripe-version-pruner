@@ -193,7 +193,7 @@ class RunForOneObject
                 $toBeDeletedCount = DB::query($selectToBeDeletedSQL)->value();
                 $totalDeleted += $toBeDeletedCount;
                 if ($this->verbose) {
-                    DB::alteration_message('... ... ... running ' . $select);
+                    DB::alteration_message('... ... ... running ' . $selectToBeDeletedSQL);
                     DB::alteration_message('... ... ... total rows to be deleted  ... ' . $toBeDeletedCount . ' of ' . $overallCount);
                 }
             } else {
