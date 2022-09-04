@@ -23,7 +23,7 @@ Sunnysideup\VersionPruner\Api\RunForOneObject:
             keepDrafts: 50
         Sunnysideup\VersionPruner\PruningTemplates\SiteTreeVersioningTemplate: []
 
-    SilverStripe\Assets\Files:
+    SilverStripe\Assets\File:
         Sunnysideup\VersionPruner\PruningTemplates\DeleteFiles: []
         Sunnysideup\VersionPruner\PruningTemplates\BasedOnTimeScale: []
 

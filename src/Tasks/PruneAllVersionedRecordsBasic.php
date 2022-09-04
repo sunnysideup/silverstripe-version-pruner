@@ -21,7 +21,7 @@ class PruneAllVersionedRecordsBasic extends BuildTask
      */
     protected $title = 'Basic SiteTree Prune';
 
-    protected $description = 'Basic SiteTree prune as an alternative.';
+    protected $description = 'Basic SiteTree prune as an alternativ to a templated system.';
 
     /**
      * @var string

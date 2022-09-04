@@ -6,7 +6,7 @@ use Sunnysideup\VersionPruner\PruningTemplatesTemplate;
 
 class Drafts extends PruningTemplatesTemplate
 {
-    private $keepDrafts = 10;
+    private $keepDraftCount = 10;
 
     public function getTitle(): string
     {
@@ -15,12 +15,22 @@ class Drafts extends PruningTemplatesTemplate
 
     public function getDescription(): string
     {
-        return 'Keep ' . $this->keepDrafts . ' drafts and delete all other drafts.';
+        return 'Keep ' . $this->keepDraftCount . ' drafts and delete all other drafts.';
     }
 
-    public function setKeepDrafts(int $keepDrafts): self
+    /**
+     * here for legacy reasons
+     */
+    public function setkeepDrafts(int $keepDraftCount): self
     {
-        $this->keepDrafts = $keepDrafts;
+        $this->keepDraftCount = $keepDraftCount;
+
+        return $this;
+    }
+
+    public function setkeepDraftCount(int $keepDraftCount): self
+    {
+        $this->keepDraftCount = $keepDraftCount;
 
         return $this;
     }
@@ -28,7 +38,7 @@ class Drafts extends PruningTemplatesTemplate
     public function run()
     {
         // remove drafts keeping `keep_drafts`
-        if ($this->keepDrafts > 0) {
+        if ($this->keepDraftCount > 0) {
             $query = $this->getBaseQuery(['WasPublished'])
                 ->addWhere(
                     [
@@ -36,7 +46,7 @@ class Drafts extends PruningTemplatesTemplate
                         'WasPublished = 0',
                     ]
                 )
-                ->setLimit($this->normaliseLimit(), $this->normaliseOffset($this->keepDrafts))
+                ->setLimit($this->normaliseLimit(), $this->normaliseOffset($this->keepDraftCount))
             ;
 
             $this->toDelete[$this->getUniqueKey()] = $this->addVersionNumberToArray(

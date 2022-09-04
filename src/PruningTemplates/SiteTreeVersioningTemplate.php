@@ -88,7 +88,7 @@ class SiteTreeVersioningTemplate extends PruningTemplatesTemplate
         // create a `ParentID - $URLSegment` array to keep only a single
         // version of each for URL redirection
         foreach ($results as $result) {
-            $keyArray[] = [];
+            $keyArray = [];
             foreach ($this->fieldsWithChangesToKeep as $field) {
                 $keyArray[] = $result[$field];
             }

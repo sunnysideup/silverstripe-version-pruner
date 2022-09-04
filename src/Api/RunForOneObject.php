@@ -150,38 +150,34 @@ class RunForOneObject
         $totalDeleted = 0;
 
         $myTemplates = $this->findBestSuitedTemplates();
-        foreach ($myTemplates as $className => $options) {
-            $runner = new $className($this->object, $this->toDelete[$this->getUniqueKey()]);
-            if ($this->verbose) {
-                DB::alteration_message('... ... ... Running ' . $runner->getTitle() . ': ' . $runner->getDescription());
-            }
+        if(is_array($myTemplates) && !empty($myTemplates)) {
+            foreach ($myTemplates as $className => $options) {
+                $runner = new $className($this->object, $this->toDelete[$this->getUniqueKey()]);
+                if ($this->verbose) {
+                    DB::alteration_message('... ... ... Running ' . $runner->getTitle() . ': ' . $runner->getDescription());
+                }
 
-            foreach ($options as $key => $value) {
-                $method = 'set' . $key;
-                $runner->{$method}($value);
-            }
+                foreach ($options as $key => $value) {
+                    $method = 'set' . $key;
+                    $runner->{$method}($value);
+                }
 
-            $runner->run();
-            $this->toDelete[$this->getUniqueKey()] = $runner->getToDelete();
+                $runner->run();
+                $this->toDelete[$this->getUniqueKey()] = $runner->getToDelete();
 
-            if ($this->verbose) {
-                DB::alteration_message('... ... ... total versions to delete now ' . count($this->toDelete[$this->getUniqueKey()]));
+                if ($this->verbose) {
+                    DB::alteration_message('... ... ... total versions to delete now ' . count($this->toDelete[$this->getUniqueKey()]));
+                }
             }
         }
-
-        if (! count($this->toDelete[$this->getUniqueKey()])) {
-            return 0;
-        }
-
         // Ugly (borrowed from DataObject::class), but returns all
         // database tables relating to DataObject
         $queriedTables = $this->getTablesForClassName();
         foreach ($queriedTables as $table) {
-            $overallCount = $this->countPerTableRegister[$table] ?? -1;
-            if($overallCount === -1) {
-                $selectOverallCountSQL = '
-                    SELECT COUNT(ID) AS C FROM "' . $table . '_Versions"';
-                $overallCount = DB::query($selectOverallCountSQL)->value();
+            $overallCount = $this->getCountPerTable($table);
+            if (! count($this->toDelete[$this->getUniqueKey()])) {
+                $this->addCountRegister($table, $overallCount);
+                return 0;
             }
             if (true === $this->dryRun) {
                 $selectToBeDeletedSQL = '
@@ -342,4 +338,18 @@ class RunForOneObject
     {
         $this->countPerTableRegister[$tableName] = $count;
     }
+
+
+    protected function getCountPerTable(string $table) : int
+    {
+        $overallCount = $this->countPerTableRegister[$table] ?? -1;
+        if($overallCount === -1) {
+            $selectOverallCountSQL = '
+                SELECT COUNT(ID) AS C FROM "' . $table . '_Versions"';
+            $overallCount = DB::query($selectOverallCountSQL)->value();
+        }
+
+        return $overallCount;
+    }
+
 }

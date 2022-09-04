@@ -110,7 +110,7 @@ class PruneAllVersionedRecords extends BuildTask
         DB::alteration_message('Completed, pruned ' . $totalTotalDeleted . ' records');
         $array = $runObject->getCountRegister();
         foreach ($array as $table => $count) {
-            DB::alteration_message($table . ' has ' . $count . ' records left.');
+            DB::alteration_message('... '.$table . ' has ' . $count . ' records left.');
         }
     }
 
