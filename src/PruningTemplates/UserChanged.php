@@ -48,7 +48,7 @@ class UserChanged extends PruningTemplatesTemplate
 
         $query = $this->getBaseQuery($this->fieldsWithChangesToKeep)
             ->addWhere($this->normaliseWhere($filter))
-            ->setLimit($this->normaliseLimit(), $this->normaliseOffset($this->keepVersions))
+            ->setLimit($this->normaliseLimit(99999), $this->normaliseOffset($this->keepVersions))
         ;
 
         $this->toDelete[$this->getUniqueKey()] = $this->addVersionNumberToArray(
