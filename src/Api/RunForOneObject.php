@@ -226,7 +226,7 @@ class RunForOneObject
         $array = [];
         $this->object = $object;
         if ($this->isValidObject()) {
-            $myTemplates = $this->findBestSuitedTemplates();
+            $myTemplates = $this->findBestSuitedTemplates(true);
             if(is_array($myTemplates) && count($myTemplates)) {
                 foreach ($myTemplates as $className => $options) {
                     $runner = new $className($this->object, []);
@@ -251,7 +251,7 @@ class RunForOneObject
             $this->toDelete[$this->getUniqueKey()] = [];
         }
 
-        $myTemplates = $this->findBestSuitedTemplates();
+        $myTemplates = $this->findBestSuitedTemplates(false);
         if(is_array($myTemplates) && !empty($myTemplates)) {
             foreach ($myTemplates as $className => $options) {
                 $runner = new $className($this->object, $this->toDelete[$this->getUniqueKey()]);
@@ -301,11 +301,14 @@ class RunForOneObject
         return $hasStages;
     }
 
-    protected function findBestSuitedTemplates()
+    protected function findBestSuitedTemplates(?bool $forExplanation = false)
     {
         if (empty($this->templatesPerClassName[$this->object->ClassName])) {
             foreach ($this->templatesAvailable as $className => $classesWithOptions) {
                 if (is_a($this->object, $className)) {
+                    if($forExplanation && $className !== $this->object->ClassName) {
+                        $this->templatesPerClassName[$this->object->ClassName] = ['Like ...' => $className];
+                    }
                     $this->templatesPerClassName[$this->object->ClassName] = $classesWithOptions;
 
                     break;
