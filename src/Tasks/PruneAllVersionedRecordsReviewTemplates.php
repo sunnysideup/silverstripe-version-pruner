@@ -42,6 +42,7 @@ class PruneAllVersionedRecordsReviewTemplates extends BuildTask
                 if ($object) {
                     $array = $runner->getTemplatesDescription($object);
                     if (count($array)) {
+                        DB::alteration_message('-----------------------------------');
                         DB::alteration_message($name . ' (' . $count . ' records) ' . $className);
                         DB::alteration_message('... ' . $className);
                         foreach ($array as $string) {

@@ -118,10 +118,12 @@ class RunForOneObject
                 unset($this->templatesAvailable[$className]);
                 continue;
             }
-            foreach($runnerClassNameWithOptions as $runnerClassName => $options) {
-                if($options === 'skip') {
-                    unset($this->templatesAvailable[$className][$runnerClassName]);
-                    continue;
+            if(is_array($runnerClassNameWithOptions)) {
+                foreach($runnerClassNameWithOptions as $runnerClassName => $options) {
+                    if($options === 'skip') {
+                        unset($this->templatesAvailable[$className][$runnerClassName]);
+                        continue;
+                    }
                 }
             }
         }
@@ -229,8 +231,12 @@ class RunForOneObject
             $myTemplates = $this->findBestSuitedTemplates(true);
             if(is_array($myTemplates) && count($myTemplates)) {
                 foreach ($myTemplates as $className => $options) {
-                    $runner = new $className($this->object, []);
-                    $array[] = $runner->getTitle() . ': ' . $runner->getDescription();
+                    if(class_exists($className)) {
+                        $runner = new $className($this->object, []);
+                        $array[] = $runner->getTitle() . ': ' . $runner->getDescription();
+                    } else {
+                        $array[] = $options;
+                    }
                 }
             }
         }
@@ -303,12 +309,13 @@ class RunForOneObject
 
     protected function findBestSuitedTemplates(?bool $forExplanation = false)
     {
-        if (empty($this->templatesPerClassName[$this->object->ClassName])) {
+        if (empty($this->templatesPerClassName[$this->object->ClassName]) || $forExplanation) {
             foreach ($this->templatesAvailable as $className => $classesWithOptions) {
                 if (is_a($this->object, $className)) {
-                    if($forExplanation && $className !== $this->object->ClassName) {
-                        $this->templatesPerClassName[$this->object->ClassName] = ['Like ...' => $className];
-                    }
+                    // if($forExplanation && $className !== $this->object->ClassName) {
+                    //     echo "$className !== {$this->object->ClassName}";
+                    //     $this->templatesPerClassName[$this->object->ClassName] = ['As '.$className];
+                    // }
                     $this->templatesPerClassName[$this->object->ClassName] = $classesWithOptions;
 
                     break;
