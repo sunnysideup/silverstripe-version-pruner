@@ -158,7 +158,7 @@ class RunForOneObject
                     SELECT COUNT(ID) AS C FROM "' . $table . '_Versions"
                     WHERE "RecordID" = ' . (int) $this->object->ID;
                 $totalRows = DB::query($selectToBeDeletedSQL)->value();
-                DB::alteration_message('... ... ... The number of rows available in '.$table.' are: '.$totalRows);
+                DB::alteration_message('... ... ... Number of rows for current object in '.$table.': '.$totalRows);
             }
             if (count($this->toDelete[$this->getUniqueKey()])) {
                 if (true === $this->dryRun) {
@@ -251,7 +251,7 @@ class RunForOneObject
                 $this->toDelete[$this->getUniqueKey()] += $runner->getToDelete();
 
                 if ($this->verbose) {
-                    DB::alteration_message('... ... ... total versions to delete now ' . count($this->toDelete[$this->getUniqueKey()]));
+                    DB::alteration_message('... ... ... Total versions to delete now ' . count($this->toDelete[$this->getUniqueKey()]));
                 }
             }
         }

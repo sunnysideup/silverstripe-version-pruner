@@ -97,7 +97,9 @@ class PruneAllVersionedRecords extends BuildTask
 
             foreach ($objects as $object) {
                 // check if stages are present
-                // DB::alteration_message('... ... Checking #ID: ' . $object->ID);
+                if($this->verbose) {
+                    DB::alteration_message('... ... Checking #ID: ' . $object->ID);
+                }
                 $totalDeleted += $runObject->deleteSuperfluousVersions($object, false);
             }
 
