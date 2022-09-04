@@ -15,9 +15,9 @@ abstract class PruningTemplatesTemplate
     /**
      * @var int
      */
-    private const DEFAULT_MAX_DELETE_IN_ONE_GO = 999;
+    private const DEFAULT_MAX_DELETE_IN_ONE_GO = 100;
 
-    private const DEFAULT_MAX_MAX_DELETE_IN_ONE_GO = 999;
+    private const DEFAULT_MAX_MAX_DELETE_IN_ONE_GO = 100;
 
     /**
      * @var string[]
