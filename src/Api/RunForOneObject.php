@@ -142,73 +142,55 @@ class RunForOneObject
             return 0;
         }
 
-        // array of version IDs to delete
-        // IMPORTANT
-        $this->toDelete[$this->getUniqueKey()] = [];
+        $this->workoutWhatNeedsDeleting();
 
         // Base table has Versioned data
         $totalDeleted = 0;
 
-        $myTemplates = $this->findBestSuitedTemplates();
-        if(is_array($myTemplates) && !empty($myTemplates)) {
-            foreach ($myTemplates as $className => $options) {
-                $runner = new $className($this->object, $this->toDelete[$this->getUniqueKey()]);
-                if ($this->verbose) {
-                    DB::alteration_message('... ... ... Running ' . $runner->getTitle() . ': ' . $runner->getDescription());
-                }
-
-                foreach ($options as $key => $value) {
-                    $method = 'set' . $key;
-                    $runner->{$method}($value);
-                }
-
-                $runner->run();
-                $this->toDelete[$this->getUniqueKey()] = $runner->getToDelete();
-
-                if ($this->verbose) {
-                    DB::alteration_message('... ... ... total versions to delete now ' . count($this->toDelete[$this->getUniqueKey()]));
-                }
-            }
-        }
         // Ugly (borrowed from DataObject::class), but returns all
         // database tables relating to DataObject
         $queriedTables = $this->getTablesForClassName();
+        // print_r($this->toDelete[$this->getUniqueKey()]);
         foreach ($queriedTables as $table) {
             $overallCount = $this->getCountPerTable($table);
-            if (! count($this->toDelete[$this->getUniqueKey()])) {
-                $this->addCountRegister($table, $overallCount);
-                return 0;
-            }
-            if (true === $this->dryRun) {
+            if($this->verbose) {
                 $selectToBeDeletedSQL = '
                     SELECT COUNT(ID) AS C FROM "' . $table . '_Versions"
-                    WHERE
-                        "Version" IN (' . implode(',', $this->toDelete[$this->getUniqueKey()]) . ')
-                        AND "RecordID" = ' . (int) $this->object->ID;
+                    WHERE "RecordID" = ' . (int) $this->object->ID;
+                $totalRows = DB::query($selectToBeDeletedSQL)->value();
+                DB::alteration_message('... ... ... The number of rows available in '.$table.' are: '.$totalRows);
+            }
+            if (count($this->toDelete[$this->getUniqueKey()])) {
+                if (true === $this->dryRun) {
+                    $selectToBeDeletedSQL = '
+                        SELECT COUNT(ID) AS C FROM "' . $table . '_Versions"
+                        WHERE
+                            "Version" IN (' . implode(',', $this->toDelete[$this->getUniqueKey()]) . ')
+                            AND "RecordID" = ' . (int) $this->object->ID;
 
-                $toBeDeletedCount = DB::query($selectToBeDeletedSQL)->value();
-                $totalDeleted += $toBeDeletedCount;
-                if ($this->verbose) {
-                    DB::alteration_message('... ... ... running ' . $selectToBeDeletedSQL);
-                    DB::alteration_message('... ... ... total rows to be deleted  ... ' . $toBeDeletedCount . ' of ' . $overallCount);
-                }
-            } else {
-                $delSQL = '
-                    DELETE FROM "' . $table . '_Versions"
-                    WHERE
-                        "Version" IN (' . implode(',', $this->toDelete[$this->getUniqueKey()]) . ')
-                        AND "RecordID" = ' . (int) $this->object->ID;
+                    $toBeDeletedCount = DB::query($selectToBeDeletedSQL)->value();
+                    $totalDeleted += $toBeDeletedCount;
+                    if ($this->verbose) {
+                        DB::alteration_message('... ... ... running ' . $selectToBeDeletedSQL);
+                        DB::alteration_message('... ... ... total rows to be deleted  ... ' . $toBeDeletedCount . ' of ' . $overallCount);
+                    }
+                } else {
+                    $delSQL = '
+                        DELETE FROM "' . $table . '_Versions"
+                        WHERE
+                            "Version" IN (' . implode(',', $this->toDelete[$this->getUniqueKey()]) . ')
+                            AND "RecordID" = ' . (int) $this->object->ID;
 
-                DB::query($delSQL);
-                $count = DB::affected_rows();
-                $totalDeleted += $count;
-                $overallCount -= $count;
-                if ($this->verbose) {
-                    DB::alteration_message('... ... ... running ' . $delSQL);
-                    DB::alteration_message('... ... ... total rows deleted ... ' . $totalDeleted);
+                    DB::query($delSQL);
+                    $count = DB::affected_rows();
+                    $totalDeleted += $count;
+                    $overallCount -= $count;
+                    if ($this->verbose) {
+                        DB::alteration_message('... ... ... running ' . $delSQL);
+                        DB::alteration_message('... ... ... total rows deleted ... ' . $totalDeleted);
+                    }
                 }
             }
-
             $this->addCountRegister($table, $overallCount);
         }
 
@@ -227,9 +209,11 @@ class RunForOneObject
         $this->object = $object;
         if ($this->isValidObject()) {
             $myTemplates = $this->findBestSuitedTemplates();
-            foreach ($myTemplates as $className => $options) {
-                $runner = new $className($this->object, []);
-                $array[] = $runner->getTitle() . ': ' . $runner->getDescription();
+            if(is_array($myTemplates) && count($myTemplates)) {
+                foreach ($myTemplates as $className => $options) {
+                    $runner = new $className($this->object, []);
+                    $array[] = $runner->getTitle() . ': ' . $runner->getDescription();
+                }
             }
         }
 
@@ -239,6 +223,38 @@ class RunForOneObject
     public function getCountRegister(): array
     {
         return $this->countPerTableRegister;
+    }
+
+    protected function workoutWhatNeedsDeleting()
+    {
+        // array of version IDs to delete
+        // IMPORTANT
+        if(! isset($this->toDelete[$this->getUniqueKey()])) {
+            $this->toDelete[$this->getUniqueKey()] = [];
+        }
+
+        $myTemplates = $this->findBestSuitedTemplates();
+        if(is_array($myTemplates) && !empty($myTemplates)) {
+            foreach ($myTemplates as $className => $options) {
+                $runner = new $className($this->object, $this->toDelete[$this->getUniqueKey()]);
+                if ($this->verbose) {
+                    DB::alteration_message('... ... ... Running ' . $runner->getTitle() . ': ' . $runner->getDescription());
+                }
+
+                foreach ($options as $key => $value) {
+                    $method = 'set' . $key;
+                    $runner->{$method}($value);
+                }
+
+                $runner->run();
+                // print_r($runner->getToDelete());
+                $this->toDelete[$this->getUniqueKey()] += $runner->getToDelete();
+
+                if ($this->verbose) {
+                    DB::alteration_message('... ... ... total versions to delete now ' . count($this->toDelete[$this->getUniqueKey()]));
+                }
+            }
+        }
     }
 
     /**
@@ -299,14 +315,14 @@ class RunForOneObject
         if (! $this->object->hasMethod('isLiveVersion')) {
             return false;
         }
-
-        if (false === $this->object->isLiveVersion()) {
-            if ($this->verbose) {
-                DB::alteration_message('... ... ... Error, not a live version', 'deleted');
-            }
-
-            return false;
-        }
+        //
+        // if (false === $this->object->isLiveVersion()) {
+        //     if ($this->verbose) {
+        //         DB::alteration_message('... ... ... Error, not a live version', 'deleted');
+        //     }
+        //
+        //     return false;
+        // }
 
         return $this->object && $this->object->exists();
     }

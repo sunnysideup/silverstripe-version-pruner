@@ -8,10 +8,6 @@ class UserChanged extends PruningTemplatesTemplate
 {
     protected $keepVersions = 10;
 
-    protected $fieldsWithChangesToKeep = [
-        'AuthorID',
-    ];
-
     public function setKeepVersions(int $keepVersions): self
     {
         $this->keepVersions = $keepVersions;
@@ -29,7 +25,7 @@ class UserChanged extends PruningTemplatesTemplate
         return 'Delete versions that are not edited by a logged-in user.';
     }
 
-    public function run()
+    public function run(?bool $verbose = false)
     {
         $this->markOlderItemsWithoutAuthor();
     }
@@ -42,16 +38,13 @@ class UserChanged extends PruningTemplatesTemplate
     protected function markOlderItemsWithoutAuthor()
     {
 
-        foreach ($this->fieldsWithChangesToKeep as $field) {
-            $filter['"' . $field . '" = ?'] = 0;
-        }
-
-        $query = $this->getBaseQuery($this->fieldsWithChangesToKeep)
+        $filter['"AuthorID" = ?'] = 0;
+        $query = $this->getBaseQuery(['AuthorID'])
             ->addWhere($this->normaliseWhere($filter))
             ->setLimit($this->normaliseLimit(9999), $this->normaliseOffset($this->keepVersions))
         ;
 
-        $this->toDelete[$this->getUniqueKey()] = $this->addVersionNumberToArray(
+        $this->toDelete[$this->getUniqueKey()] += $this->addVersionNumberToArray(
             $this->toDelete[$this->getUniqueKey()],
             $query->execute()
         );

@@ -35,7 +35,7 @@ class Drafts extends PruningTemplatesTemplate
         return $this;
     }
 
-    public function run()
+    public function run(?bool $verbose = false)
     {
         // remove drafts keeping `keep_drafts`
         if ($this->keepDraftCount > 0) {
@@ -49,7 +49,7 @@ class Drafts extends PruningTemplatesTemplate
                 ->setLimit($this->normaliseLimit(), $this->normaliseOffset($this->keepDraftCount))
             ;
 
-            $this->toDelete[$this->getUniqueKey()] = $this->addVersionNumberToArray(
+            $this->toDelete[$this->getUniqueKey()] += $this->addVersionNumberToArray(
                 $this->toDelete[$this->getUniqueKey()],
                 $query->execute()
             );

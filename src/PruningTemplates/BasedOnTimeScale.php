@@ -37,9 +37,7 @@ class BasedOnTimeScale extends PruningTemplatesTemplate
         ],
     ];
 
-    protected $otherFilters = [
-        '"WasPublished" = ?' => 1,
-    ];
+    protected $otherFilters = [];
 
     public function setOtherFilters(array $otherFilters): self
     {
@@ -65,7 +63,7 @@ class BasedOnTimeScale extends PruningTemplatesTemplate
         return 'Ones close to now are kept at a more regular interval (e.g. one per hour) and olders ones at a less regular interval (e.g. one per month).';
     }
 
-    public function run()
+    public function run(?bool $verbose = false)
     {
         $toKeep = $this->buildTimeScalePatternAndOnesToKeep();
         $query = $this->getBaseQuery()
@@ -77,8 +75,7 @@ class BasedOnTimeScale extends PruningTemplatesTemplate
                 $this->otherFilters
             )
         ;
-
-        $this->toDelete[$this->getUniqueKey()] = $this->addVersionNumberToArray(
+        $this->toDelete[$this->getUniqueKey()] += $this->addVersionNumberToArray(
             $this->toDelete[$this->getUniqueKey()],
             $query->execute()
         );
@@ -97,7 +94,8 @@ class BasedOnTimeScale extends PruningTemplatesTemplate
                 $where =
                     '(
                         "LastEdited" > TIMESTAMP(\'' . date('Y-m-d h:i:s', $fromTs) . '\') AND
-                        "LastEdited" < TIMESTAMP(\'' . date('Y-m-d h:i:s', $untilTs) . '\')
+                        "LastEdited" < TIMESTAMP(\'' . date('Y-m-d h:i:s', $untilTs) . '\') AND
+                        "WasPublished" = 1
                     )';
                 $query = $this->getBaseQuery()
                     ->addWhere($this->normaliseWhere([$where] + $this->otherFilters))

@@ -15,7 +15,8 @@ abstract class PruningTemplatesTemplate
     /**
      * @var int
      */
-    private const DEFAULT_MAX_DELETE_IN_ONE_GO = 100;
+    private const DEFAULT_MAX_DELETE_IN_ONE_GO = 999;
+
     private const DEFAULT_MAX_MAX_DELETE_IN_ONE_GO = 9999;
 
     /**
@@ -73,7 +74,7 @@ abstract class PruningTemplatesTemplate
     /**
      * adds / removes records to be deleted.
      */
-    abstract public function run();
+    abstract public function run(?bool $verbose = false);
 
     abstract public function getTitle(): string;
 
@@ -106,13 +107,17 @@ abstract class PruningTemplatesTemplate
         return $this->uniqueKey = $this->object->ClassName . '_' . $this->object->ID;
     }
 
+    /**
+     * we keep adding to array ...
+     * @return array
+     */
     protected function addVersionNumberToArray(array $array, $records, ?string $field = 'Version'): array
     {
+        $myArray = [];
         foreach ($records as $record) {
-            $array[$record[$field]] = $record[$field];
+            $myArray[$record[$field]] = $record[$field];
         }
-
-        return $array;
+        return $array + $myArray;
     }
 
     protected function getBaseQuery(?array $additionalFieldsToSelect = []): SQLSelect

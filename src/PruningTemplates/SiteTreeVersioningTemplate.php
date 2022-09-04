@@ -30,7 +30,7 @@ class SiteTreeVersioningTemplate extends PruningTemplatesTemplate
         return 'Delete versions that are older and do not include any changes in ParentID or URLSegment.';
     }
 
-    public function run()
+    public function run(?bool $verbose = false)
     {
         $this->markOlderItemsWithTheSameKeyValues();
         $this->markSuperfluousOnesWithDifferentKeyValues();
@@ -56,7 +56,7 @@ class SiteTreeVersioningTemplate extends PruningTemplatesTemplate
             ->setLimit($this->normaliseLimit(), $this->normaliseOffset($this->keepVersions))
         ;
 
-        $this->toDelete[$this->getUniqueKey()] = $this->addVersionNumberToArray(
+        $this->toDelete[$this->getUniqueKey()] += $this->addVersionNumberToArray(
             $this->toDelete[$this->getUniqueKey()],
             $query->execute()
         );

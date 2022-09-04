@@ -20,14 +20,14 @@ class DeleteFiles extends PruningTemplatesTemplate
     /**
      * Prune versions of deleted files/folders.
      */
-    public function run()
+    public function run(?bool $verbose = false)
     {
         if ($this->hasBeenDeleted()) {
             $query = $this->getBaseQuery()
                 ->addWhere(['"RecordID" = ?' => $this->object->ID])
             ;
             //starting from "keepVersions" - going backwards in time
-            $this->toDelete[$this->getUniqueKey()] = $this->addVersionNumberToArray(
+            $this->toDelete[$this->getUniqueKey()] += $this->addVersionNumberToArray(
                 $this->toDelete[$this->getUniqueKey()],
                 $query->execute()
             );
