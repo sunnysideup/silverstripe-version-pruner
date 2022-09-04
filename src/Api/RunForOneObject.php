@@ -103,10 +103,28 @@ class RunForOneObject
 
     public function __construct()
     {
+        $this->gatherTemplates();
+    }
+
+    protected function gatherTemplates()
+    {
         $this->templatesAvailable = array_reverse(
             $this->Config()->get('templates'),
             true //important - to preserve keys!
         );
+        // remove skips
+        foreach($this->templatesAvailable as $className => $runnerClassNameWithOptions) {
+            if($runnerClassNameWithOptions === 'skip') {
+                unset($this->templatesAvailable[$className]);
+                continue;
+            }
+            foreach($runnerClassNameWithOptions as $runnerClassName => $options) {
+                if($options === 'skip') {
+                    unset($this->templatesAvailable[$className][$runnerClassName]);
+                    continue;
+                }
+            }
+        }
     }
 
     public static function inst()

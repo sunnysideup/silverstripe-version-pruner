@@ -35,3 +35,8 @@ Sunnysideup\VersionPruner\Api\RunForOneObject:
 
     Client\Website\Model\ExtendsMoreSpecificPage:
         Sunnysideup\VersionPruner\PruningTemplates\SiteTreeVersioningTemplate: []
+
+    Client\Website\Model\AnotherPage: 'skip'
+
+    Client\Website\Model\AnotherPage2:
+        Sunnysideup\VersionPruner\PruningTemplates\MySiteTreeVersioningTemplate: skip
