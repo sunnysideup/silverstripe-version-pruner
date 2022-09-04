@@ -9,7 +9,9 @@ Name: 'version_pruner'
 # set up like this, it means that the HomePage on your website will be pruned as a HomePage
 # and not as a SiteTree.
 #
-# default, listed here first, will become the least import, least likely to be selected.
+# default, listed here first, will become the least importantt, least likely to be selected.
+#
+# The more pruners you add per class, the more items will be deleted ...
 
 Sunnysideup\VersionPruner\Api\RunForOneObject:
   templates:

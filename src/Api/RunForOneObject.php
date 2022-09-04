@@ -312,9 +312,9 @@ class RunForOneObject
             return false;
         }
 
-        if (! $this->object->hasMethod('isLiveVersion')) {
-            return false;
-        }
+        // if (! $this->object->hasMethod('isLiveVersion')) {
+        //     return false;
+        // }
         //
         // if (false === $this->object->isLiveVersion()) {
         //     if ($this->verbose) {
