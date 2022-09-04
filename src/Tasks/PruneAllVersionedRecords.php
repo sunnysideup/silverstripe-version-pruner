@@ -17,7 +17,7 @@ class PruneAllVersionedRecords extends BuildTask
     /**
      * @var int
      */
-    protected const MAX_ITEMS_PER_CLASS = 5;
+    protected const MAX_ITEMS_PER_CLASS = 500;
 
     /**
      * @var string
