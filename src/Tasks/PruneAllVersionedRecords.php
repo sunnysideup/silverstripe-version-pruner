@@ -104,12 +104,12 @@ class PruneAllVersionedRecords extends BuildTask
             }
 
             if ($totalDeleted > 0) {
-                DB::alteration_message('... ... Deleted ' . $totalDeleted . 'version records');
+                DB::alteration_message('... ... Deleted ' . $totalDeleted . ' version records');
                 $totalTotalDeleted += $totalDeleted;
             }
         }
 
-        DB::alteration_message('Completed, pruned ' . $totalTotalDeleted . 'version records');
+        DB::alteration_message('Completed, pruned ' . $totalTotalDeleted . ' version records');
         $array = $runObject->getCountRegister();
         foreach ($array as $table => $count) {
             DB::alteration_message('... '.$table . ' has ' . $count . ' version records left.');
