@@ -115,7 +115,7 @@ class RunForOneObject
         // remove skips
         foreach($this->templatesAvailable as $className => $runnerClassNameWithOptions) {
             if($runnerClassNameWithOptions === 'skip') {
-                unset($this->templatesAvailable[$className]);
+                $this->templatesAvailable[$className] = 'skip';
                 continue;
             }
             if(is_array($runnerClassNameWithOptions)) {

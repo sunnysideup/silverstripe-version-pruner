@@ -4,9 +4,11 @@ namespace Sunnysideup\VersionPruner\PruningTemplates;
 
 use Sunnysideup\VersionPruner\PruningTemplatesTemplate;
 
+use SilverStripe\ORM\DB;
+
 class UserChanged extends PruningTemplatesTemplate
 {
-    protected $keepVersions = 10;
+    protected $keepVersions = 3;
 
     public function setKeepVersions(int $keepVersions): self
     {
@@ -27,6 +29,7 @@ class UserChanged extends PruningTemplatesTemplate
 
     public function run(?bool $verbose = false)
     {
+        $rows = DB::query('SELECT * FROM SiteTree_Versions WHERE AuthorID > 0 AND RecordID = '.$this->object->ID);
         $this->markOlderItemsWithoutAuthor();
     }
 
@@ -43,30 +46,10 @@ class UserChanged extends PruningTemplatesTemplate
             ->addWhere($this->normaliseWhere($filter))
             ->setLimit($this->normaliseLimit(), $this->normaliseOffset($this->keepVersions))
         ;
-
         $this->toDelete[$this->getUniqueKey()] += $this->addVersionNumberToArray(
             $this->toDelete[$this->getUniqueKey()],
             $query->execute()
         );
     }
 
-    protected function getItemsToKeep(): array
-    {
-        // Get the most recent Version IDs of all published pages to ensure
-        // we leave at least X versions even if a URLSegment or ParentID
-        // has changed.
-        $query = $this->getBaseQuery([])
-            ->addWhere(
-                [
-                    '"RecordID" = ?' => $this->object->ID,
-                ]
-            )
-            ->setLimit($this->keepVersions, 0)
-        ;
-
-        return $this->addVersionNumberToArray(
-            [],
-            $query->execute()
-        );
-    }
 }
