@@ -154,7 +154,7 @@ class RunForOneObject
      * @param DataObject $object
      *
      */
-    public function getTableSizes($object): array
+    public function getTableSizes($object, ?bool $lastOnly = true): array
     {
         $this->object = $object;
         $array = [];
@@ -165,8 +165,35 @@ class RunForOneObject
                 $array[$table] = $this->getCountPerTable($table);
             }
         }
+        if(count($array) && $lastOnly) {
+            $lastKey = array_key_last($array);
+            return [
+                $lastKey => $array[$lastKey],
+            ];
+        }
         return $array;
     }
+
+    /**
+     * returns the total number deleted.
+     *
+     * @param DataObject $object
+     *
+     */
+    public function getRootTable($object): ?string
+    {
+        $this->object = $object;
+        $array = [];
+        if ($this->isValidObject()) {
+            $queriedTables = $this->getTablesForClassName();
+            // print_r($this->toDelete[$this->getUniqueKey()]);
+            foreach ($queriedTables as $table) {
+                return $table;
+            }
+        }
+        return null;
+    }
+
     /**
      * returns the total number deleted.
      *
