@@ -62,14 +62,23 @@ class PruneAllVersionedRecordsReviewTemplates extends BuildTask
         }
     }
 
+    protected $objectCountPerClassNameCache = [];
+    protected $objectCountForVersionsPerClassNameCache = [];
+
     protected function getObjectCountPerClassName(string $className): int
     {
-        return $className::get()->limit(100000)->count();
+        if(! isset($this->objectCountPerClassNameCache[$className])) {
+            $this->objectCountPerClassNameCache[$className] = $className::get()->limit(100000)->count();
+        }
+        return $this->objectCountPerClassNameCache[$className];
     }
 
     protected function getObjectCountForVersionsPerClassName(string $className): int
     {
-        $tableName = Config::inst()->get($className, 'table_name');
-        return DB::query('SELECT COUNT("ID") FROM "'.$tableName.'_Versions";')->value();
+        if(! isset($this->objectCountForVersionsPerClassNameCache[$className])) {
+            $tableName = Config::inst()->get($className, 'table_name');
+            $this->objectCountForVersionsPerClassNameCache[$className] = (int) DB::query('SELECT COUNT("ID") FROM "'.$tableName.'_Versions";')->value();
+        }
+        return $this->objectCountForVersionsPerClassNameCache[$className];
     }
 }
