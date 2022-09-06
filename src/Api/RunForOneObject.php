@@ -424,7 +424,7 @@ class RunForOneObject
             $this->tablesPerClassName[$className] = $srcQuery->queriedTables();
         }
 
-        return $this->tablesPerClassName[$this->object->ClassName];
+        return $this->tablesPerClassName[$className];
     }
 
     protected function addCountRegister(string $tableName, int $count): void

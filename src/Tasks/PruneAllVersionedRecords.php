@@ -92,7 +92,7 @@ class PruneAllVersionedRecords extends BuildTask
         DB::alteration_message('-------------------- ');
         foreach ($classes as $className) {
             DB::alteration_message('... Looking at ' . $className);
-            $objects = $this->getObjectsPerClassName($runner, $className);
+            $objects = $this->getObjectsPerClassName($runObject, $className);
             $totalDeleted = 0;
 
             foreach ($objects as $object) {
@@ -118,14 +118,14 @@ class PruneAllVersionedRecords extends BuildTask
         }
     }
 
-    protected function getObjectsPerClassName($runner, string $className): DataList
+    protected function getObjectsPerClassName($runObject, string $className): DataList
     {
-        $rootTable = $runner->getRootTable($className);
+        $rootTable = $runObject->getRootTable($className);
         $sql = '
             SELECT COUNT("ID") AS C, "RecordID"
             FROM "'.$rootTable.'_Versions"
             WHERE "ClassName" = \''.addslashes($className).'\'
-            ORDER BY C DESC;';
+            ORDER BY RecordID DESC;';
         $rows = DB::query($sql);
         $array = [];
         foreach($rows as $row) {
