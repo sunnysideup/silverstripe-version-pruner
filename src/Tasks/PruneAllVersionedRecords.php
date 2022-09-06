@@ -126,10 +126,12 @@ class PruneAllVersionedRecords extends BuildTask
             FROM "'.$rootTable.'_Versions"
             WHERE ClassName = \''.addslashes($className).'\'
             GROUP BY "RecordID"
-            ORDER BY RecordID DESC';
+            ORDER BY C DESC
+            LIMIT '.$this->limit.';';
         $rows = DB::query($sql);
         $array = [-1 => 0];
         foreach($rows as $row) {
+            print_r($row);
             $array[] = $row['RecordID'];
         }
         return Versioned::get_by_stage($className, Versioned::DRAFT)
@@ -142,6 +144,21 @@ class PruneAllVersionedRecords extends BuildTask
      * Get all versioned database classes.
      */
     protected function getAllVersionedDataClasses(): array
+    {
+        $allClasses = ClassInfo::subclassesFor(DataObject::class);
+        $versionedClasses = [];
+        foreach ($allClasses as $className) {
+            if (DataObject::has_extension($className, Versioned::class)) {
+                $versionedClasses[$className] = $className;
+            }
+        }
+
+        return $versionedClasses;
+    }
+    /**
+     * Get all versioned database classes.
+     */
+    protected function getAllVersionedDataClassesBase(): array
     {
         $allClasses = ClassInfo::subclassesFor(DataObject::class);
         $versionedClasses = [];
