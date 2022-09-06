@@ -131,7 +131,6 @@ class PruneAllVersionedRecords extends BuildTask
         $rows = DB::query($sql);
         $array = [-1 => 0];
         foreach($rows as $row) {
-            print_r($row);
             $array[] = $row['RecordID'];
         }
         return Versioned::get_by_stage($className, Versioned::DRAFT)
