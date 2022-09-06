@@ -63,6 +63,7 @@ class PruneAllVersionedRecordsReviewTemplates extends BuildTask
     }
 
     protected $objectCountPerClassNameCache = [];
+
     protected $objectCountForVersionsPerClassNameCache = [];
 
     protected function getObjectCountPerClassName(string $className): int
@@ -80,5 +81,30 @@ class PruneAllVersionedRecordsReviewTemplates extends BuildTask
             $this->objectCountForVersionsPerClassNameCache[$className] = (int) DB::query('SELECT COUNT("ID") FROM "'.$tableName.'_Versions";')->value();
         }
         return $this->objectCountForVersionsPerClassNameCache[$className];
+    }
+
+    /**
+     * Get all versioned database classes.
+     */
+    protected function getAllVersionedDataClassesBase(): array
+    {
+        $allClasses = ClassInfo::subclassesFor(DataObject::class);
+        $versionedClasses = [];
+        foreach ($allClasses as $className) {
+            if (DataObject::has_extension($className, Versioned::class)) {
+                $ancestors = ClassInfo::ancestry($className);
+                foreach ($ancestors as $classNameInner) {
+                    if (DataObject::has_extension($classNameInner, Versioned::class)) {
+                        $versionedClasses[$classNameInner] = $classNameInner;
+
+                        continue 2;
+                    }
+                }
+
+                $versionedClasses[$className] = $className;
+            }
+        }
+
+        return $versionedClasses;
     }
 }
