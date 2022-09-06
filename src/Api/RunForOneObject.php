@@ -180,12 +180,10 @@ class RunForOneObject
      * @param DataObject $object
      *
      */
-    public function getRootTable($object): ?string
+    public function getRootTable(string $className): ?string
     {
-        $this->object = $object;
-        $array = [];
-        if ($this->isValidObject()) {
-            $queriedTables = $this->getTablesForClassName();
+        if (class_exists($className)) {
+            $queriedTables = $this->getTablesForClassName($className);
             // print_r($this->toDelete[$this->getUniqueKey()]);
             foreach ($queriedTables as $table) {
                 return $table;
@@ -403,9 +401,12 @@ class RunForOneObject
         return $this->object && $this->object->exists();
     }
 
-    protected function getTablesForClassName(): array
+    protected function getTablesForClassName(?string $className = ''): array
     {
-        if (empty($this->tablesPerClassName[$this->object->ClassName])) {
+        if(! $className) {
+            $className = $this->object->ClassName;
+        }
+        if (empty($this->tablesPerClassName[$className])) {
             // $classTables = []
             // $allClasses = ClassInfo::subclassesFor($this->object->ClassName, true);
             // foreach ($allClasses as $class) {
@@ -415,12 +416,12 @@ class RunForOneObject
             // }
             // $this->tablesPerClassName[$this->object->ClassName] = array_unique($classTables);
 
-            $srcQuery = DataList::create($this->object->ClassName)
+            $srcQuery = DataList::create($className)
                 ->filter('ID', $this->object->ID)
                 ->dataQuery()
                 ->query()
             ;
-            $this->tablesPerClassName[$this->object->ClassName] = $srcQuery->queriedTables();
+            $this->tablesPerClassName[$className] = $srcQuery->queriedTables();
         }
 
         return $this->tablesPerClassName[$this->object->ClassName];
