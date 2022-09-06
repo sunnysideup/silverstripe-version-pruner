@@ -203,6 +203,7 @@ class RunForOneObject
     {
         $this->object = $object;
         if (! $this->isValidObject()) {
+            echo $object->ClassName .' ERROR';
             return 0;
         }
         // reset to reduce size ...
@@ -397,8 +398,8 @@ class RunForOneObject
         //
         //     return false;
         // }
-
-        return $this->object && $this->object->exists();
+        // do not use exists here - as it has a different meaning for files and folders.
+        return $this->object && $this->object->ID;
     }
 
     protected function getTablesForClassName(?string $className = ''): array
