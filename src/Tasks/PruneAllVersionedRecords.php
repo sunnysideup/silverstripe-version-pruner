@@ -91,8 +91,12 @@ class PruneAllVersionedRecords extends BuildTask
         DB::alteration_message('limit per class: ' . $this->limit, 'created');
         DB::alteration_message('-------------------- ');
         foreach ($classes as $className) {
-            DB::alteration_message('... Looking at ' . $className);
             $objects = $this->getObjectsPerClassName($runObject, $className);
+            $noData = '';
+            if(! $objects->exists()) {
+                $noData = '- nothing to do';
+            }
+            DB::alteration_message('... Looking at ' . $className. ' '.$noData);
             $totalDeleted = 0;
 
             foreach ($objects as $object) {
