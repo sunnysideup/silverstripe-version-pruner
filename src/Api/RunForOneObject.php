@@ -153,6 +153,25 @@ class RunForOneObject
      *
      * @param DataObject $object
      *
+     */
+    public function getTableSizes($object): array
+    {
+        $this->object = $object;
+        $array = [];
+        if ($this->isValidObject()) {
+            $queriedTables = $this->getTablesForClassName();
+            // print_r($this->toDelete[$this->getUniqueKey()]);
+            foreach ($queriedTables as $table) {
+                $array[$table] = $this->getCountPerTable($table);
+            }
+        }
+        return $array;
+    }
+    /**
+     * returns the total number deleted.
+     *
+     * @param DataObject $object
+     *
      * @return int number of deletions
      */
     public function deleteSuperfluousVersions($object): int
@@ -161,6 +180,8 @@ class RunForOneObject
         if (! $this->isValidObject()) {
             return 0;
         }
+        // reset to reduce size ...
+        $this->toDelete = [];
 
         $this->workoutWhatNeedsDeleting();
 
