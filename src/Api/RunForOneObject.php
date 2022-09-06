@@ -154,7 +154,7 @@ class RunForOneObject
      * @param DataObject $object
      *
      */
-    public function getTableSizes($object, ?bool $lastOnly = true): array
+    public function getTableSizes($object, ?bool $lastOnly = false): array
     {
         $this->object = $object;
         $array = [];
@@ -415,9 +415,9 @@ class RunForOneObject
             //     }
             // }
             // $this->tablesPerClassName[$this->object->ClassName] = array_unique($classTables);
-
+            $id = $this->object->ID ?? 0;
             $srcQuery = DataList::create($className)
-                ->filter('ID', $this->object->ID)
+                ->filter('ID', intval($id) + 0)
                 ->dataQuery()
                 ->query()
             ;

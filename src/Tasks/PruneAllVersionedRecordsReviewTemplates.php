@@ -50,9 +50,9 @@ class PruneAllVersionedRecordsReviewTemplates extends BuildTask
                             DB::alteration_message('... ... ' . $string);
                         }
                     }
-                    $array = $runner->getTableSizes($object);
+                    $array = $runner->getTableSizes($object, true);
                     if(! empty($array)) {
-                        DB::alteration_message('... Tables');
+                        DB::alteration_message('... Version Records');
                         foreach($array as $table => $size) {
                             DB::alteration_message('... ... ' . $table.': '. number_format($size));
                         }

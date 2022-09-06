@@ -124,10 +124,12 @@ class PruneAllVersionedRecords extends BuildTask
         $sql = '
             SELECT COUNT("ID") AS C, "RecordID"
             FROM "'.$rootTable.'_Versions"
-            WHERE "ClassName" = \''.addslashes($className).'\'
-            ORDER BY RecordID DESC;';
+            WHERE ClassName = \''.addslashes($className).'\'
+            GROUP BY "RecordID"
+            ORDER BY RecordID DESC
+            LIMIT '.$this->limit.';';
         $rows = DB::query($sql);
-        $array = [];
+        $array = [-1 => 0];
         foreach($rows as $row) {
             $array[] = $row['RecordID'];
         }
