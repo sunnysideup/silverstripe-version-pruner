@@ -126,8 +126,7 @@ class PruneAllVersionedRecords extends BuildTask
             FROM "'.$rootTable.'_Versions"
             WHERE ClassName = \''.addslashes($className).'\'
             GROUP BY "RecordID"
-            ORDER BY RecordID DESC
-            LIMIT '.$this->limit.';';
+            ORDER BY RecordID DESC';
         $rows = DB::query($sql);
         $array = [-1 => 0];
         foreach($rows as $row) {
