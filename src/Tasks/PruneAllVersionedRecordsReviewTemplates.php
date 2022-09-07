@@ -42,12 +42,19 @@ class PruneAllVersionedRecordsReviewTemplates extends BuildTask
                 if ($object) {
                     $array = $runner->getTemplatesDescription($object);
                     if (count($array)) {
-                        $versionCount = $this->getObjectCountForVersionsPerClassName($className);
-                        DB::alteration_message('-----------------------------------');
-                        DB::alteration_message($name . ' (' . $count . ' records, '.$versionCount.' version records) ' . $className);
+                        DB::alteration_message($name . ' (' . $count . ' records) ' . $className);
                         DB::alteration_message('... ' . $className);
                         foreach ($array as $string) {
                             DB::alteration_message('... ... ' . $string);
+                        }
+                    } else {
+                        // DB::alteration_message('No data for: '.$className);
+                    }
+                    $array = $runner->getTableSizes($object, true);
+                    if(! empty($array)) {
+                        DB::alteration_message('... Version Records');
+                        foreach($array as $table => $size) {
+                            DB::alteration_message('... ... ' . $table.': '. number_format($size));
                         }
                     }
                 }
@@ -55,14 +62,49 @@ class PruneAllVersionedRecordsReviewTemplates extends BuildTask
         }
     }
 
+    protected $objectCountPerClassNameCache = [];
+
+    protected $objectCountForVersionsPerClassNameCache = [];
+
     protected function getObjectCountPerClassName(string $className): int
     {
-        return $className::get()->limit(100000)->count();
+        if(! isset($this->objectCountPerClassNameCache[$className])) {
+            $this->objectCountPerClassNameCache[$className] = $className::get()->limit(100000)->count();
+        }
+        return $this->objectCountPerClassNameCache[$className];
     }
 
     protected function getObjectCountForVersionsPerClassName(string $className): int
     {
-        $tableName = Config::inst()->get($className, 'table_name');
-        return DB::query('SELECT COUNT("ID") FROM "'.$tableName.'_Versions";')->value();
+        if(! isset($this->objectCountForVersionsPerClassNameCache[$className])) {
+            $tableName = Config::inst()->get($className, 'table_name');
+            $this->objectCountForVersionsPerClassNameCache[$className] = (int) DB::query('SELECT COUNT("ID") FROM "'.$tableName.'_Versions";')->value();
+        }
+        return $this->objectCountForVersionsPerClassNameCache[$className];
+    }
+
+    /**
+     * Get all versioned database classes.
+     */
+    protected function getAllVersionedDataClassesBase(): array
+    {
+        $allClasses = ClassInfo::subclassesFor(DataObject::class);
+        $versionedClasses = [];
+        foreach ($allClasses as $className) {
+            if (DataObject::has_extension($className, Versioned::class)) {
+                $ancestors = ClassInfo::ancestry($className);
+                foreach ($ancestors as $classNameInner) {
+                    if (DataObject::has_extension($classNameInner, Versioned::class)) {
+                        $versionedClasses[$classNameInner] = $classNameInner;
+
+                        continue 2;
+                    }
+                }
+
+                $versionedClasses[$className] = $className;
+            }
+        }
+
+        return $versionedClasses;
     }
 }

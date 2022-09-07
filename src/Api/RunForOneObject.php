@@ -97,7 +97,7 @@ class RunForOneObject
         ],
         File::class => [
             DeleteFiles::class => [],
-            BasedOnTimeScale::class => [],
+            // OnlyLastOnes::class => [],
         ],
     ];
 
@@ -153,14 +153,61 @@ class RunForOneObject
      *
      * @param DataObject $object
      *
+     */
+    public function getTableSizes($object, ?bool $lastOnly = false): array
+    {
+        $this->object = $object;
+        $array = [];
+        if ($this->isValidObject()) {
+            $queriedTables = $this->getTablesForClassName();
+            // print_r($this->toDelete[$this->getUniqueKey()]);
+            foreach ($queriedTables as $table) {
+                $array[$table] = $this->getCountPerTable($table);
+            }
+        }
+        if(count($array) && $lastOnly) {
+            $lastKey = array_key_last($array);
+            return [
+                $lastKey => $array[$lastKey],
+            ];
+        }
+        return $array;
+    }
+
+    /**
+     * returns the total number deleted.
+     *
+     * @param DataObject $object
+     *
+     */
+    public function getRootTable(string $className): ?string
+    {
+        if (class_exists($className)) {
+            $queriedTables = $this->getTablesForClassName($className);
+            // print_r($this->toDelete[$this->getUniqueKey()]);
+            foreach ($queriedTables as $table) {
+                return $table;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * returns the total number deleted.
+     *
+     * @param DataObject $object
+     *
      * @return int number of deletions
      */
     public function deleteSuperfluousVersions($object): int
     {
         $this->object = $object;
         if (! $this->isValidObject()) {
+            echo $object->ClassName .' ERROR';
             return 0;
         }
+        // reset to reduce size ...
+        $this->toDelete = [];
 
         $this->workoutWhatNeedsDeleting();
 
@@ -351,13 +398,16 @@ class RunForOneObject
         //
         //     return false;
         // }
-
-        return $this->object && $this->object->exists();
+        // do not use exists here - as it has a different meaning for files and folders.
+        return $this->object && $this->object->ID;
     }
 
-    protected function getTablesForClassName(): array
+    protected function getTablesForClassName(?string $className = ''): array
     {
-        if (empty($this->tablesPerClassName[$this->object->ClassName])) {
+        if(! $className) {
+            $className = $this->object->ClassName;
+        }
+        if (empty($this->tablesPerClassName[$className])) {
             // $classTables = []
             // $allClasses = ClassInfo::subclassesFor($this->object->ClassName, true);
             // foreach ($allClasses as $class) {
@@ -366,16 +416,16 @@ class RunForOneObject
             //     }
             // }
             // $this->tablesPerClassName[$this->object->ClassName] = array_unique($classTables);
-
-            $srcQuery = DataList::create($this->object->ClassName)
-                ->filter('ID', $this->object->ID)
+            $id = $this->object->ID ?? 0;
+            $srcQuery = DataList::create($className)
+                ->filter('ID', intval($id) + 0)
                 ->dataQuery()
                 ->query()
             ;
-            $this->tablesPerClassName[$this->object->ClassName] = $srcQuery->queriedTables();
+            $this->tablesPerClassName[$className] = $srcQuery->queriedTables();
         }
 
-        return $this->tablesPerClassName[$this->object->ClassName];
+        return $this->tablesPerClassName[$className];
     }
 
     protected function addCountRegister(string $tableName, int $count): void

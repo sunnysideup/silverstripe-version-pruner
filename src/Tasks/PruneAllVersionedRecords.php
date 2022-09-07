@@ -17,7 +17,7 @@ class PruneAllVersionedRecords extends BuildTask
     /**
      * @var int
      */
-    protected const MAX_ITEMS_PER_CLASS = 500;
+    protected const MAX_ITEMS_PER_CLASS = 100;
 
     /**
      * @var string
@@ -91,8 +91,12 @@ class PruneAllVersionedRecords extends BuildTask
         DB::alteration_message('limit per class: ' . $this->limit, 'created');
         DB::alteration_message('-------------------- ');
         foreach ($classes as $className) {
-            DB::alteration_message('... Looking at ' . $className);
-            $objects = $this->getObjectsPerClassName($className);
+            $objects = $this->getObjectsPerClassName($runObject, $className);
+            $noData = '';
+            if(! $objects->exists()) {
+                $noData = '- nothing to do';
+            }
+            DB::alteration_message('... Looking at ' . $className. ' '.$noData);
             $totalDeleted = 0;
 
             foreach ($objects as $object) {
@@ -100,7 +104,7 @@ class PruneAllVersionedRecords extends BuildTask
                 if($this->verbose) {
                     DB::alteration_message('... ... Checking #ID: ' . $object->ID);
                 }
-                $totalDeleted += $runObject->deleteSuperfluousVersions($object, false);
+                $totalDeleted += $runObject->deleteSuperfluousVersions($object);
             }
 
             if ($totalDeleted > 0) {
@@ -118,10 +122,23 @@ class PruneAllVersionedRecords extends BuildTask
         }
     }
 
-    protected function getObjectsPerClassName(string $className): DataList
+    protected function getObjectsPerClassName($runObject, string $className): DataList
     {
+        $rootTable = $runObject->getRootTable($className);
+        $sql = '
+            SELECT COUNT("ID") AS C, "RecordID"
+            FROM "'.$rootTable.'_Versions"
+            WHERE ClassName = \''.addslashes($className).'\'
+            GROUP BY "RecordID"
+            ORDER BY C DESC
+            LIMIT '.$this->limit.';';
+        $rows = DB::query($sql);
+        $array = [-1 => 0];
+        foreach($rows as $row) {
+            $array[] = $row['RecordID'];
+        }
         return Versioned::get_by_stage($className, Versioned::DRAFT)
-            ->sort(DB::get_conn()->random() . ' ASC')
+            ->filter(['ID' => $array])
             ->limit($this->limit)
         ;
     }
@@ -135,19 +152,11 @@ class PruneAllVersionedRecords extends BuildTask
         $versionedClasses = [];
         foreach ($allClasses as $className) {
             if (DataObject::has_extension($className, Versioned::class)) {
-                $ancestors = ClassInfo::ancestry($className);
-                foreach ($ancestors as $classNameInner) {
-                    if (DataObject::has_extension($classNameInner, Versioned::class)) {
-                        $versionedClasses[$classNameInner] = $classNameInner;
-
-                        continue 2;
-                    }
-                }
-
                 $versionedClasses[$className] = $className;
             }
         }
 
         return $versionedClasses;
     }
+
 }
