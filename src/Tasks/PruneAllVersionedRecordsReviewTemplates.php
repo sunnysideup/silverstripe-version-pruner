@@ -37,12 +37,12 @@ class PruneAllVersionedRecordsReviewTemplates extends BuildTask
         foreach ($allClasses as $className) {
             $name = Injector::inst()->get($className)->i18n_singular_name();
             $count = $this->getObjectCountPerClassName($className);
-            $versionCount = $this->getObjectCountPerClassName($className);
             if ($count) {
                 $object = DataObject::get_one($className);
                 if ($object) {
                     $array = $runner->getTemplatesDescription($object);
                     if (count($array)) {
+                        $versionCount = $this->getObjectCountForVersionsPerClassName($className);
                         DB::alteration_message('-----------------------------------');
                         DB::alteration_message($name . ' (' . $count . ' records, '.$versionCount.' version records) ' . $className);
                         DB::alteration_message('... ' . $className);
