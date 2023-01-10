@@ -175,10 +175,7 @@ class RunForOneObject
     }
 
     /**
-     * returns the total number deleted.
-     *
-     * @param DataObject $object
-     *
+    *
      */
     public function getRootTable(string $className): ?string
     {
@@ -268,7 +265,6 @@ class RunForOneObject
      * returns the total number deleted.
      *
      * @param DataObject $object
-     * @param bool       $verbose
      */
     public function getTemplatesDescription($object): array
     {
