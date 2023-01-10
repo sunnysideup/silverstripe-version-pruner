@@ -356,6 +356,8 @@ class RunForOneObject
 
     protected function findBestSuitedTemplates(?bool $forExplanation = false)
     {
+        $templates = $this->Config()->get('templates');
+        $classesWithOptions = [];
         if (empty($this->templatesPerClassName[$this->object->ClassName]) || $forExplanation) {
             foreach ($this->templatesAvailable as $className => $classesWithOptions) {
                 if (is_a($this->object, $className)) {
