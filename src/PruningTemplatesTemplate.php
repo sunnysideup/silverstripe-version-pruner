@@ -58,11 +58,8 @@ abstract class PruningTemplatesTemplate
     private $uniqueKey = '';
 
     /**
-     * list of Versions.
-     *
-     * @var array
-     *
      * @param mixed $object
+     * @param array $toDelete
      */
     public function __construct($object, array $toDelete)
     {

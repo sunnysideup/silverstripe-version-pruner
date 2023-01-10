@@ -36,7 +36,7 @@ class UserChanged extends PruningTemplatesTemplate
     /**
      * these can be deleted.
      *
-     * @return [type] [description]
+     * @return void
      */
     protected function markOlderItemsWithoutAuthor()
     {

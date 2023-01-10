@@ -39,7 +39,6 @@ class SiteTreeVersioningTemplate extends PruningTemplatesTemplate
     /**
      * these can be deleted.
      *
-     * @return [type] [description]
      */
     protected function markOlderItemsWithTheSameKeyValues()
     {
