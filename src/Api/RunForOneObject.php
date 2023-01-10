@@ -31,7 +31,7 @@ class RunForOneObject
     /**
      * array of Version numbers to delete.
      *
-     * @var string
+     * @var array
      */
     protected $toDelete = [];
 
