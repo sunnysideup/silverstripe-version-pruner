@@ -106,29 +106,6 @@ class RunForOneObject
         $this->gatherTemplates();
     }
 
-    protected function gatherTemplates()
-    {
-        $this->templatesAvailable = array_reverse(
-            $this->Config()->get('templates'),
-            true //important - to preserve keys!
-        );
-        // remove skips
-        foreach($this->templatesAvailable as $className => $runnerClassNameWithOptions) {
-            if($runnerClassNameWithOptions === 'skip') {
-                $this->templatesAvailable[$className] = 'skip';
-                continue;
-            }
-            if(is_array($runnerClassNameWithOptions)) {
-                foreach($runnerClassNameWithOptions as $runnerClassName => $options) {
-                    if($options === 'skip') {
-                        unset($this->templatesAvailable[$className][$runnerClassName]);
-                        continue;
-                    }
-                }
-            }
-        }
-    }
-
     public static function inst()
     {
         return Injector::inst()->get(static::class);
@@ -152,7 +129,6 @@ class RunForOneObject
      * returns the total number deleted.
      *
      * @param DataObject $object
-     *
      */
     public function getTableSizes($object, ?bool $lastOnly = false): array
     {
@@ -165,18 +141,17 @@ class RunForOneObject
                 $array[$table] = $this->getCountPerTable($table);
             }
         }
-        if(count($array) && $lastOnly) {
+        if (count($array) && $lastOnly) {
             $lastKey = array_key_last($array);
+
             return [
                 $lastKey => $array[$lastKey],
             ];
         }
+
         return $array;
     }
 
-    /**
-    *
-     */
     public function getRootTable(string $className): ?string
     {
         if (class_exists($className)) {
@@ -186,6 +161,7 @@ class RunForOneObject
                 return $table;
             }
         }
+
         return null;
     }
 
@@ -200,7 +176,8 @@ class RunForOneObject
     {
         $this->object = $object;
         if (! $this->isValidObject()) {
-            echo $object->ClassName .' ERROR';
+            echo $object->ClassName . ' ERROR';
+
             return 0;
         }
         // reset to reduce size ...
@@ -217,12 +194,12 @@ class RunForOneObject
         // print_r($this->toDelete[$this->getUniqueKey()]);
         foreach ($queriedTables as $table) {
             $overallCount = $this->getCountPerTable($table);
-            if($this->verbose) {
+            if ($this->verbose) {
                 $selectToBeDeletedSQL = '
                     SELECT COUNT(ID) AS C FROM "' . $table . '_Versions"
                     WHERE "RecordID" = ' . (int) $this->object->ID;
                 $totalRows = DB::query($selectToBeDeletedSQL)->value();
-                DB::alteration_message('... ... ... Number of rows for current object in '.$table.': '.$totalRows);
+                DB::alteration_message('... ... ... Number of rows for current object in ' . $table . ': ' . $totalRows);
             }
             if (count($this->toDelete[$this->getUniqueKey()])) {
                 if (true === $this->dryRun) {
@@ -272,9 +249,9 @@ class RunForOneObject
         $this->object = $object;
         if ($this->isValidObject()) {
             $myTemplates = $this->findBestSuitedTemplates(true);
-            if(is_array($myTemplates) && count($myTemplates)) {
+            if (is_array($myTemplates) && count($myTemplates)) {
                 foreach ($myTemplates as $className => $options) {
-                    if(class_exists($className)) {
+                    if (class_exists($className)) {
                         $runner = new $className($this->object, []);
                         $array[] = $runner->getTitle() . ': ' . $runner->getDescription();
                     } else {
@@ -292,16 +269,41 @@ class RunForOneObject
         return $this->countPerTableRegister;
     }
 
+    protected function gatherTemplates()
+    {
+        $this->templatesAvailable = array_reverse(
+            $this->Config()->get('templates'),
+            true //important - to preserve keys!
+        );
+        // remove skips
+        foreach ($this->templatesAvailable as $className => $runnerClassNameWithOptions) {
+            if ('skip' === $runnerClassNameWithOptions) {
+                $this->templatesAvailable[$className] = 'skip';
+
+                continue;
+            }
+            if (is_array($runnerClassNameWithOptions)) {
+                foreach ($runnerClassNameWithOptions as $runnerClassName => $options) {
+                    if ('skip' === $options) {
+                        unset($this->templatesAvailable[$className][$runnerClassName]);
+
+                        continue;
+                    }
+                }
+            }
+        }
+    }
+
     protected function workoutWhatNeedsDeleting()
     {
         // array of version IDs to delete
         // IMPORTANT
-        if(! isset($this->toDelete[$this->getUniqueKey()])) {
+        if (! isset($this->toDelete[$this->getUniqueKey()])) {
             $this->toDelete[$this->getUniqueKey()] = [];
         }
 
         $myTemplates = $this->findBestSuitedTemplates(false);
-        if(is_array($myTemplates) && !empty($myTemplates)) {
+        if (is_array($myTemplates) && ! empty($myTemplates)) {
             foreach ($myTemplates as $className => $options) {
                 $runner = new $className($this->object, $this->toDelete[$this->getUniqueKey()]);
                 if ($this->verbose) {
@@ -402,7 +404,7 @@ class RunForOneObject
 
     protected function getTablesForClassName(?string $className = ''): array
     {
-        if(! $className) {
+        if (! $className) {
             $className = $this->object->ClassName;
         }
         if (empty($this->tablesPerClassName[$className])) {
@@ -431,11 +433,10 @@ class RunForOneObject
         $this->countPerTableRegister[$tableName] = $count;
     }
 
-
-    protected function getCountPerTable(string $table) : int
+    protected function getCountPerTable(string $table): int
     {
         $overallCount = $this->countPerTableRegister[$table] ?? -1;
-        if($overallCount === -1) {
+        if (-1 === $overallCount) {
             $selectOverallCountSQL = '
                 SELECT COUNT(ID) AS C FROM "' . $table . '_Versions"';
             $overallCount = DB::query($selectOverallCountSQL)->value();
@@ -443,5 +444,4 @@ class RunForOneObject
 
         return $overallCount;
     }
-
 }

@@ -19,7 +19,7 @@ class Drafts extends PruningTemplatesTemplate
     }
 
     /**
-     * here for legacy reasons
+     * here for legacy reasons.
      */
     public function setkeepDrafts(int $keepDraftCount): self
     {

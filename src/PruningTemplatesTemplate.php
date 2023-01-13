@@ -59,7 +59,6 @@ abstract class PruningTemplatesTemplate
 
     /**
      * @param mixed $object
-     * @param array $toDelete
      */
     public function __construct($object, array $toDelete)
     {
@@ -106,7 +105,8 @@ abstract class PruningTemplatesTemplate
 
     /**
      * we keep adding to array ...
-     * @return array
+     *
+     * @param mixed $records
      */
     protected function addVersionNumberToArray(array $array, $records, ?string $field = 'Version'): array
     {
@@ -114,6 +114,7 @@ abstract class PruningTemplatesTemplate
         foreach ($records as $record) {
             $myArray[$record[$field]] = $record[$field];
         }
+
         return $array + $myArray;
     }
 

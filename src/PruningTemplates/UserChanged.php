@@ -2,9 +2,8 @@
 
 namespace Sunnysideup\VersionPruner\PruningTemplates;
 
-use Sunnysideup\VersionPruner\PruningTemplatesTemplate;
-
 use SilverStripe\ORM\DB;
+use Sunnysideup\VersionPruner\PruningTemplatesTemplate;
 
 class UserChanged extends PruningTemplatesTemplate
 {
@@ -29,18 +28,15 @@ class UserChanged extends PruningTemplatesTemplate
 
     public function run(?bool $verbose = false)
     {
-        $rows = DB::query('SELECT * FROM SiteTree_Versions WHERE AuthorID > 0 AND RecordID = '.$this->object->ID);
+        $rows = DB::query('SELECT * FROM SiteTree_Versions WHERE AuthorID > 0 AND RecordID = ' . $this->object->ID);
         $this->markOlderItemsWithoutAuthor();
     }
 
     /**
      * these can be deleted.
-     *
-     * @return void
      */
     protected function markOlderItemsWithoutAuthor()
     {
-
         $filter['"AuthorID" = ?'] = 0;
         $query = $this->getBaseQuery(['AuthorID'])
             ->addWhere($this->normaliseWhere($filter))
@@ -51,5 +47,4 @@ class UserChanged extends PruningTemplatesTemplate
             $query->execute()
         );
     }
-
 }

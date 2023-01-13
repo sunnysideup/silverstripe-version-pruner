@@ -9,7 +9,6 @@ use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DB;
 use SilverStripe\Versioned\Versioned;
-
 use Sunnysideup\VersionPruner\Api\RunForOneObject;
 
 class PruneAllVersionedRecords extends BuildTask
@@ -93,15 +92,15 @@ class PruneAllVersionedRecords extends BuildTask
         foreach ($classes as $className) {
             $objects = $this->getObjectsPerClassName($runObject, $className);
             $noData = '';
-            if(! $objects->exists()) {
+            if (! $objects->exists()) {
                 $noData = '- nothing to do';
             }
-            DB::alteration_message('... Looking at ' . $className. ' '.$noData);
+            DB::alteration_message('... Looking at ' . $className . ' ' . $noData);
             $totalDeleted = 0;
 
             foreach ($objects as $object) {
                 // check if stages are present
-                if($this->verbose) {
+                if ($this->verbose) {
                     DB::alteration_message('... ... Checking #ID: ' . $object->ID);
                 }
                 $totalDeleted += $runObject->deleteSuperfluousVersions($object);
@@ -118,7 +117,7 @@ class PruneAllVersionedRecords extends BuildTask
         DB::alteration_message('-------------------- ');
         $array = $runObject->getCountRegister();
         foreach ($array as $table => $count) {
-            DB::alteration_message('... '.$table . ' has ' . $count . ' version records left.');
+            DB::alteration_message('... ' . $table . ' has ' . $count . ' version records left.');
         }
     }
 
@@ -127,16 +126,17 @@ class PruneAllVersionedRecords extends BuildTask
         $rootTable = $runObject->getRootTable($className);
         $sql = '
             SELECT COUNT("ID") AS C, "RecordID"
-            FROM "'.$rootTable.'_Versions"
-            WHERE ClassName = \''.addslashes($className).'\'
+            FROM "' . $rootTable . '_Versions"
+            WHERE ClassName = \'' . addslashes($className) . '\'
             GROUP BY "RecordID"
             ORDER BY C DESC
-            LIMIT '.$this->limit.';';
+            LIMIT ' . $this->limit . ';';
         $rows = DB::query($sql);
         $array = [-1 => 0];
-        foreach($rows as $row) {
+        foreach ($rows as $row) {
             $array[] = $row['RecordID'];
         }
+
         return Versioned::get_by_stage($className, Versioned::DRAFT)
             ->filter(['ID' => $array])
             ->limit($this->limit)
@@ -158,5 +158,4 @@ class PruneAllVersionedRecords extends BuildTask
 
         return $versionedClasses;
     }
-
 }
