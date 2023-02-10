@@ -14,9 +14,11 @@ use Sunnysideup\VersionPruner\Api\RunForOneObject;
 class PruneAllVersionedRecords extends BuildTask
 {
     /**
+     * the number of unique records in the LIVE / DRAFT Table
+     * that will be looked at in one go.
      * @var int
      */
-    protected const MAX_ITEMS_PER_CLASS = 100;
+    protected const MAX_ITEMS_PER_CLASS = 10000;
 
     /**
      * @var string
@@ -81,8 +83,7 @@ class PruneAllVersionedRecords extends BuildTask
         $totalTotalDeleted = 0;
         $runObject = RunForOneObject::inst()
             ->setVerbose($this->verbose)
-            ->setDryRun($this->dryRun)
-        ;
+            ->setDryRun($this->dryRun);
         DB::alteration_message('settings (set as parameters)');
         DB::alteration_message('-------------------- ');
         DB::alteration_message('verbose: ' . ($this->verbose ? 'yes' : 'no'), 'created');
@@ -92,7 +93,7 @@ class PruneAllVersionedRecords extends BuildTask
         foreach ($classes as $className) {
             $objects = $this->getObjectsPerClassName($runObject, $className);
             $noData = '';
-            if (! $objects->exists()) {
+            if (!$objects->exists()) {
                 $noData = '- nothing to do';
             }
             DB::alteration_message('... Looking at ' . $className . ' ' . $noData);
@@ -139,8 +140,7 @@ class PruneAllVersionedRecords extends BuildTask
 
         return Versioned::get_by_stage($className, Versioned::DRAFT)
             ->filter(['ID' => $array])
-            ->limit($this->limit)
-        ;
+            ->limit($this->limit);
     }
 
     /**

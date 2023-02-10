@@ -15,9 +15,7 @@ abstract class PruningTemplatesTemplate
     /**
      * @var int
      */
-    private const DEFAULT_MAX_DELETE_IN_ONE_GO = 100;
-
-    private const DEFAULT_MAX_MAX_DELETE_IN_ONE_GO = 100;
+    private const DEFAULT_MAX_DELETE_IN_ONE_GO = 1000;
 
     /**
      * @var string[]
@@ -136,8 +134,8 @@ abstract class PruningTemplatesTemplate
 
     protected function normaliseLimit(?int $int = self::DEFAULT_MAX_DELETE_IN_ONE_GO): int
     {
-        if ($int > self::DEFAULT_MAX_MAX_DELETE_IN_ONE_GO) {
-            $int = self::DEFAULT_MAX_MAX_DELETE_IN_ONE_GO;
+        if ($int > self::DEFAULT_MAX_DELETE_IN_ONE_GO) {
+            $int = self::DEFAULT_MAX_DELETE_IN_ONE_GO;
         }
 
         return $int;
