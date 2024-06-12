@@ -28,7 +28,7 @@ class UserChanged extends PruningTemplatesTemplate
 
     public function run(?bool $verbose = false)
     {
-        $rows = DB::query('SELECT * FROM SiteTree_Versions WHERE AuthorID > 0 AND RecordID = ' . $this->object->ID);
+        DB::query('SELECT * FROM SiteTree_Versions WHERE AuthorID > 0 AND RecordID = ' . $this->object->ID);
         $this->markOlderItemsWithoutAuthor();
     }
 

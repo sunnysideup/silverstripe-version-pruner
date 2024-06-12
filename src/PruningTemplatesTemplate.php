@@ -49,13 +49,6 @@ abstract class PruningTemplatesTemplate
     protected $toDelete = [];
 
     /**
-     * unique key to avoid mixing up records.
-     *
-     * @var string
-     */
-    private $uniqueKey = '';
-
-    /**
      * @param mixed $object
      */
     public function __construct($object, array $toDelete)
@@ -98,7 +91,7 @@ abstract class PruningTemplatesTemplate
      */
     protected function getUniqueKey(): string
     {
-        return $this->uniqueKey = $this->object->ClassName . '_' . $this->object->ID;
+        return $this->object->ClassName . '_' . $this->object->ID;
     }
 
     /**

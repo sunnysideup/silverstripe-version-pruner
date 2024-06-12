@@ -41,11 +41,11 @@ class PruneAllVersionedRecordsReviewTemplates extends BuildTask
         foreach ($allClasses as $className) {
             $name = Injector::inst()->get($className)->i18n_singular_name();
             $count = $this->getObjectCountPerClassName($className);
-            if ($count) {
+            if ($count !== 0) {
                 $object = DataObject::get_one($className);
                 if ($object) {
                     $array = $runner->getTemplatesDescription($object);
-                    if (count($array)) {
+                    if (count($array) > 0) {
                         DB::alteration_message($name . ' (' . $count . ' records) ' . $className);
                         DB::alteration_message('... ' . $className);
                         foreach ($array as $string) {
@@ -55,7 +55,7 @@ class PruneAllVersionedRecordsReviewTemplates extends BuildTask
                     // DB::alteration_message('No data for: '.$className);
 
                     $array = $runner->getTableSizes($object, true);
-                    if (!empty($array)) {
+                    if (! empty($array)) {
                         DB::alteration_message('... Version Records');
                         foreach ($array as $table => $size) {
                             DB::alteration_message('... ... ' . $table . ': ' . number_format($size));
@@ -68,7 +68,7 @@ class PruneAllVersionedRecordsReviewTemplates extends BuildTask
 
     protected function getObjectCountPerClassName(string $className): int
     {
-        if (!isset($this->objectCountPerClassNameCache[$className])) {
+        if (! isset($this->objectCountPerClassNameCache[$className])) {
             $this->objectCountPerClassNameCache[$className] = $className::get()->count();
         }
 
@@ -77,7 +77,7 @@ class PruneAllVersionedRecordsReviewTemplates extends BuildTask
 
     protected function getObjectCountForVersionsPerClassName(string $className): int
     {
-        if (!isset($this->objectCountForVersionsPerClassNameCache[$className])) {
+        if (! isset($this->objectCountForVersionsPerClassNameCache[$className])) {
             $tableName = Config::inst()->get($className, 'table_name');
             $this->objectCountForVersionsPerClassNameCache[$className] = (int) DB::query('SELECT COUNT("ID") FROM "' . $tableName . '_Versions";')->value();
         }

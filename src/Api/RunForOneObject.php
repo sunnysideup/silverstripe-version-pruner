@@ -201,7 +201,7 @@ class RunForOneObject
                 $totalRows = DB::query($selectToBeDeletedSQL)->value();
                 DB::alteration_message('... ... ... Number of rows for current object in ' . $table . ': ' . $totalRows);
             }
-            if (count($this->toDelete[$this->getUniqueKey()])) {
+            if (count($this->toDelete[$this->getUniqueKey()]) > 0) {
                 if (true === $this->dryRun) {
                     $selectToBeDeletedSQL = '
                         SELECT COUNT(ID) AS C FROM "' . $table . '_Versions"
@@ -303,7 +303,7 @@ class RunForOneObject
         }
 
         $myTemplates = $this->findBestSuitedTemplates(false);
-        if (is_array($myTemplates) && ! empty($myTemplates)) {
+        if (is_array($myTemplates) && $myTemplates !== []) {
             foreach ($myTemplates as $className => $options) {
                 $runner = new $className($this->object, $this->toDelete[$this->getUniqueKey()]);
                 if ($this->verbose) {
@@ -358,7 +358,7 @@ class RunForOneObject
         $classesWithOptions = [];
         if (empty($this->templatesPerClassName[$this->object->ClassName]) || $forExplanation) {
             foreach ($this->templatesAvailable as $className => $classesWithOptions) {
-                if (is_a($this->object, $className)) {
+                if ($this->object instanceof $className) {
                     // if($forExplanation && $className !== $this->object->ClassName) {
                     //     echo "$className !== {$this->object->ClassName}";
                     //     $this->templatesPerClassName[$this->object->ClassName] = ['As '.$className];
@@ -418,7 +418,7 @@ class RunForOneObject
             // $this->tablesPerClassName[$this->object->ClassName] = array_unique($classTables);
             $id = $this->object->ID ?? 0;
             $srcQuery = DataList::create($className)
-                ->filter('ID', intval($id) + 0)
+                ->filter('ID', intval($id))
                 ->dataQuery()
                 ->query()
             ;

@@ -93,7 +93,7 @@ class PruneAllVersionedRecords extends BuildTask
         foreach ($classes as $className) {
             $objects = $this->getObjectsPerClassName($runObject, $className);
             $noData = '';
-            if (!$objects->exists()) {
+            if (! $objects->exists()) {
                 $noData = '- nothing to do';
             }
             DB::alteration_message('... Looking at ' . $className . ' ' . $noData);
