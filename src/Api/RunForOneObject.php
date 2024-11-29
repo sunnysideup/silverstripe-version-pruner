@@ -14,6 +14,7 @@ use SilverStripe\Versioned\Versioned;
 use Sunnysideup\VersionPruner\PruningTemplates\BasedOnTimeScale;
 use Sunnysideup\VersionPruner\PruningTemplates\DeleteFiles;
 use Sunnysideup\VersionPruner\PruningTemplates\Drafts;
+use Sunnysideup\VersionPruner\PruningTemplates\OnlyLastOnes;
 use Sunnysideup\VersionPruner\PruningTemplates\SiteTreeVersioningTemplate;
 
 class RunForOneObject
