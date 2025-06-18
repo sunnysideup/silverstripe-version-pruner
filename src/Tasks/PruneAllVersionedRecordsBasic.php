@@ -1,6 +1,6 @@
 <?php
 
-namespace Sunnysideup\VersionPruner\Api;
+namespace Sunnysideup\VersionPruner\Tasks;
 
 use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Core\ClassInfo;
@@ -82,10 +82,10 @@ class PruneAllVersionedRecordsBasic extends BuildTask
     {
         return '
         Basic SiteTree prune of older records.
-        This task will remove all versions of SiteTree records with a LastEdited date of: '.
-        $this->Config()->get('delete_older_than_strtotime_phrase').
-        ' or older.
-        Up to '.self::MAX_ITEMS_PER_CLASS.' records will be deleted per run.
+        This task will remove all versions of SiteTree records with a LastEdited date of: ' .
+            $this->Config()->get('delete_older_than_strtotime_phrase') .
+            ' or older.
+        Up to ' . self::MAX_ITEMS_PER_CLASS . ' records will be deleted per run.
         For a more advanced approach, you can set up a template for a pruning service.';
     }
 }
