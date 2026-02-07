@@ -75,6 +75,7 @@ class PruneAllVersionedRecordsBasic extends BuildTask
         $newestRecord = DB::query('SELECT MAX(LastEdited) FROM SiteTree_Versions')->value();
         DB::alteration_message("Total pages: {$numberOfRecords}, oldest record: {$oldestRecord}, newest record: {$newestRecord}", 'created');
     }
+
     /**
      * @return string HTML formatted description
      */
