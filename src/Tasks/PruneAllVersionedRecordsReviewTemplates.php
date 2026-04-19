@@ -16,7 +16,7 @@ class PruneAllVersionedRecordsReviewTemplates extends BuildTask
     /**
      * @var string
      */
-    protected $title = 'Prune all versioned records - review templates for each dataobject';
+    protected string $title = 'Prune all versioned records - review templates for each dataobject';
 
     protected $description = 'Go through all dataobjects and shows the pruning schedule.';
 
@@ -53,6 +53,7 @@ class PruneAllVersionedRecordsReviewTemplates extends BuildTask
                             DB::alteration_message('... ... ' . $string);
                         }
                     }
+
                     // DB::alteration_message('No data for: '.$className);
 
                     $array = $runner->getTableSizes($object, true);

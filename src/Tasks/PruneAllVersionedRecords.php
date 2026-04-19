@@ -3,7 +3,6 @@
 namespace Sunnysideup\VersionPruner\Tasks;
 
 use SilverStripe\Core\ClassInfo;
-use SilverStripe\Core\Config\Config;
 use SilverStripe\Dev\BuildTask;
 use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataObject;
@@ -23,7 +22,7 @@ class PruneAllVersionedRecords extends BuildTask
     /**
      * @var string
      */
-    protected $title = 'Prune all versioned records';
+    protected string $title = 'Prune all versioned records';
 
     protected $description = 'Go through all dataobjects that are versioned and prune them as per schema provided.';
 
@@ -96,6 +95,7 @@ class PruneAllVersionedRecords extends BuildTask
             if (! $objects->exists()) {
                 $noData = '- nothing to do';
             }
+
             DB::alteration_message('... Looking at ' . $className . ' ' . $noData);
             $totalDeleted = 0;
 
@@ -104,6 +104,7 @@ class PruneAllVersionedRecords extends BuildTask
                 if ($this->verbose) {
                     DB::alteration_message('... ... Checking #ID: ' . $object->ID);
                 }
+
                 $totalDeleted += $runObject->deleteSuperfluousVersions($object);
             }
 
