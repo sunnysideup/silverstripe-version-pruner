@@ -3,13 +3,16 @@
 namespace Sunnysideup\VersionPruner\Tasks;
 
 use SilverStripe\Core\ClassInfo;
-use SilverStripe\Core\Config\Config;
 use SilverStripe\Dev\BuildTask;
 use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DB;
 use SilverStripe\Versioned\Versioned;
 use Sunnysideup\VersionPruner\Api\RunForOneObject;
+use SilverStripe\PolyExecution\PolyOutput;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 
 class PruneAllVersionedRecords extends BuildTask
 {
@@ -23,9 +26,17 @@ class PruneAllVersionedRecords extends BuildTask
     /**
      * @var string
      */
-    protected $title = 'Prune all versioned records';
+    protected static string $commandName = 'prune-all-versioned-records';
 
-    protected $description = 'Go through all dataobjects that are versioned and prune them as per schema provided.';
+    /**
+     * @var string
+     */
+    protected string $title = 'Prune all versioned records';
+
+    /**
+     * @var string
+     */
+    protected static string $description = 'Go through all dataobjects that are versioned and prune them as per schema provided.';
 
     protected $limit = self::MAX_ITEMS_PER_CLASS;
 
@@ -34,9 +45,16 @@ class PruneAllVersionedRecords extends BuildTask
     protected $dryRun = false;
 
     /**
-     * @var string
+     * Get CLI options for this task
      */
-    private static $segment = 'prune-all-versioned-records';
+    public function getOptions(): array
+    {
+        return [
+            new InputOption('verbose', 'v', InputOption::VALUE_NONE, 'Enable verbose output'),
+            new InputOption('dry', 'd', InputOption::VALUE_NONE, 'Perform a dry run without deleting records'),
+            new InputOption('limit', 'l', InputOption::VALUE_REQUIRED, 'Limit per class', self::MAX_ITEMS_PER_CLASS),
+        ];
+    }
 
     public function setVerbose(?bool $verbose = true): self
     {
@@ -61,65 +79,68 @@ class PruneAllVersionedRecords extends BuildTask
 
     /**
      * Prune all published DataObjects which are published according to config.
-     *
-     * @param mixed $request
      */
-    public function run($request)
+    protected function execute(InputInterface $input, PolyOutput $output): int
     {
         $classes = $this->getAllVersionedDataClasses();
-        if ($request && $request->requestVar('verbose')) {
-            $this->verbose = $request->requestVar('verbose');
+        
+        if ($input->getOption('verbose')) {
+            $this->verbose = true;
         }
 
-        if ($request && $request->requestVar('dry')) {
-            $this->dryRun = $request->requestVar('dry');
+        if ($input->getOption('dry')) {
+            $this->dryRun = true;
         }
 
-        if ($request && $request->requestVar('limit')) {
-            $this->limit = $request->requestVar('limit');
+        if ($input->getOption('limit')) {
+            $this->limit = (int) $input->getOption('limit');
         }
 
-        DB::alteration_message('Pruning all DataObjects with a maximum of ' . self::MAX_ITEMS_PER_CLASS . ' per class.');
+        $output->writeln('Pruning all DataObjects with a maximum of ' . self::MAX_ITEMS_PER_CLASS . ' per class.');
         $totalTotalDeleted = 0;
         $runObject = RunForOneObject::inst()
             ->setVerbose($this->verbose)
             ->setDryRun($this->dryRun);
-        DB::alteration_message('settings (set as parameters)');
-        DB::alteration_message('-------------------- ');
-        DB::alteration_message('verbose: ' . ($this->verbose ? 'yes' : 'no'), 'created');
-        DB::alteration_message('dry run: ' . ($this->dryRun ? 'yes' : 'no'), 'created');
-        DB::alteration_message('limit per class: ' . $this->limit, 'created');
-        DB::alteration_message('-------------------- ');
+        $output->writeln('settings (set as parameters)');
+        $output->writeln('-------------------- ');
+        $output->writeln('verbose: ' . ($this->verbose ? 'yes' : 'no'));
+        $output->writeln('dry run: ' . ($this->dryRun ? 'yes' : 'no'));
+        $output->writeln('limit per class: ' . $this->limit);
+        $output->writeln('-------------------- ');
         foreach ($classes as $className) {
             $objects = $this->getObjectsPerClassName($runObject, $className);
             $noData = '';
             if (! $objects->exists()) {
                 $noData = '- nothing to do';
             }
-            DB::alteration_message('... Looking at ' . $className . ' ' . $noData);
+
+            $output->writeln('... Looking at ' . $className . ' ' . $noData);
             $totalDeleted = 0;
 
             foreach ($objects as $object) {
                 // check if stages are present
                 if ($this->verbose) {
-                    DB::alteration_message('... ... Checking #ID: ' . $object->ID);
+                    $output->writeln('... ... Checking #ID: ' . $object->ID);
                 }
+
                 $totalDeleted += $runObject->deleteSuperfluousVersions($object);
             }
 
             if ($totalDeleted > 0) {
-                DB::alteration_message('... ... Deleted ' . $totalDeleted . ' version records');
+                $output->writeln('... ... Deleted ' . $totalDeleted . ' version records');
                 $totalTotalDeleted += $totalDeleted;
             }
         }
 
-        DB::alteration_message('-------------------- ');
-        DB::alteration_message('Completed, pruned ' . $totalTotalDeleted . ' version records');
-        DB::alteration_message('-------------------- ');
+        $output->writeln('-------------------- ');
+        $output->writeln('Completed, pruned ' . $totalTotalDeleted . ' version records');
+        $output->writeln('-------------------- ');
         $array = $runObject->getCountRegister();
         foreach ($array as $table => $count) {
-            DB::alteration_message('... ' . $table . ' has ' . $count . ' version records left.');
+            $output->writeln('... ' . $table . ' has ' . $count . ' version records left.');
         }
+
+        return Command::SUCCESS;
     }
 
     protected function getObjectsPerClassName($runObject, string $className): DataList

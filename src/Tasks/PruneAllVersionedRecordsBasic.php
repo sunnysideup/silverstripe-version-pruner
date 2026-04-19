@@ -2,12 +2,15 @@
 
 namespace Sunnysideup\VersionPruner\Tasks;
 
+use Override;
 use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Core\ClassInfo;
-use SilverStripe\Core\Config\Config;
 use SilverStripe\Dev\BuildTask;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DB;
+use SilverStripe\PolyExecution\PolyOutput;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
 
 class PruneAllVersionedRecordsBasic extends BuildTask
 {
@@ -19,28 +22,29 @@ class PruneAllVersionedRecordsBasic extends BuildTask
     /**
      * @var string
      */
-    protected $title = 'Basic SiteTree Prune of Older Records';
-
-    protected $description = 'See getDescription method for more information.';
+    protected static string $commandName = 'prune-all-versioned-records-sitetree-basic';
 
     /**
      * @var string
      */
-    private static $segment = 'prune-all-versioned-records-sitetree-basic';
+    protected string $title = 'Basic SiteTree Prune of Older Records';
+
+    /**
+     * @var string
+     */
+    protected static string $description = 'Basic SiteTree prune of older records. This task will remove all versions of SiteTree records with a LastEdited date older than the configured threshold. Up to 500 records will be deleted per run. For a more advanced approach, you can set up a template for a pruning service.';
 
     private static $delete_older_than_strtotime_phrase = '-12 months';
 
     /**
      * Prune all published DataObjects which are published according to config.
-     *
-     * @param mixed $request
      */
-    public function run($request)
+    protected function execute(InputInterface $input, PolyOutput $output): int
     {
         $numberOfRecords = DB::query('SELECT COUNT(ID) FROM SiteTree_Versions')->value();
         $oldestRecord = DB::query('SELECT MIN(LastEdited) FROM SiteTree_Versions')->value();
         $newestRecord = DB::query('SELECT MAX(LastEdited) FROM SiteTree_Versions')->value();
-        DB::alteration_message("BEFORE: Total pages: {$numberOfRecords}, oldest record: {$oldestRecord}, newest record: {$newestRecord}", 'created');
+        $output->writeln(sprintf('BEFORE: Total pages: %s, oldest record: %s, newest record: %s', $numberOfRecords, $oldestRecord, $newestRecord));
 
         $classTables = ['SiteTree'];
         $allClasses = ClassInfo::subclassesFor(SiteTree::class);
@@ -51,42 +55,32 @@ class PruneAllVersionedRecordsBasic extends BuildTask
         }
 
         $classTables = array_unique($classTables);
-        $beforeDate = date('Y-m-d', strtotime($this->Config()->get('delete_older_than_strtotime_phrase')));
-        DB::alteration_message("Looking for all versions that are older than {$beforeDate}", 'created');
+        $beforeDate = date('Y-m-d', strtotime((string) $this->Config()->get('delete_older_than_strtotime_phrase')));
+        $output->writeln('Looking for all versions that are older than ' . $beforeDate);
         foreach ($classTables as $classTable) {
             $tableName = $classTable . '_Versions';
             if ('SiteTree_Versions' === $tableName) {
                 // first we delete the oldies
-                $joinWhere = " \"LastEdited\" < date '{$beforeDate}'";
+                $joinWhere = sprintf(" \"LastEdited\" < date '%s'", $beforeDate);
                 $leftJoin = '';
             } else {
                 // now we delete the non-linking ones
-                $leftJoin = " LEFT JOIN SiteTree_Versions ON {$tableName}.RecordID = SiteTree_Versions.RecordID AND {$tableName}.Version = SiteTree_Versions.Version ";
+                $leftJoin = sprintf(' LEFT JOIN SiteTree_Versions ON %s.RecordID = SiteTree_Versions.RecordID AND %s.Version = SiteTree_Versions.Version ', $tableName, $tableName);
                 $joinWhere = ' SiteTree_Versions.RecordID IS NULL';
             }
 
-            DB::alteration_message("DELETING ALL ENTRIES FROM {$tableName}");
-            $sql = "DELETE {$tableName}.* FROM \"{$tableName}\" {$leftJoin} WHERE {$joinWhere};";
+            $output->writeln('DELETING ALL ENTRIES FROM ' . $tableName);
+            $sql = sprintf('DELETE %s.* FROM "%s" %s WHERE %s;', $tableName, $tableName, $leftJoin, $joinWhere);
             DB::query($sql);
         }
 
         $numberOfRecords = DB::query('SELECT COUNT(ID) FROM SiteTree_Versions')->value();
         $oldestRecord = DB::query('SELECT MIN(LastEdited) FROM SiteTree_Versions')->value();
         $newestRecord = DB::query('SELECT MAX(LastEdited) FROM SiteTree_Versions')->value();
-        DB::alteration_message("Total pages: {$numberOfRecords}, oldest record: {$oldestRecord}, newest record: {$newestRecord}", 'created');
+        $output->writeln(sprintf('Total pages: %s, oldest record: %s, newest record: %s', $numberOfRecords, $oldestRecord, $newestRecord));
+
+        return Command::SUCCESS;
     }
 
-    /**
-     * @return string HTML formatted description
-     */
-    public function getDescription()
-    {
-        return '
-        Basic SiteTree prune of older records.
-        This task will remove all versions of SiteTree records with a LastEdited date of: ' .
-            $this->Config()->get('delete_older_than_strtotime_phrase') .
-            ' or older.
-        Up to ' . self::MAX_ITEMS_PER_CLASS . ' records will be deleted per run.
-        For a more advanced approach, you can set up a template for a pruning service.';
-    }
+
 }
