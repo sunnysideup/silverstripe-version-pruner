@@ -14,7 +14,6 @@ use SilverStripe\Versioned\Versioned;
 use Sunnysideup\VersionPruner\PruningTemplates\BasedOnTimeScale;
 use Sunnysideup\VersionPruner\PruningTemplates\DeleteFiles;
 use Sunnysideup\VersionPruner\PruningTemplates\Drafts;
-use Sunnysideup\VersionPruner\PruningTemplates\OnlyLastOnes;
 use Sunnysideup\VersionPruner\PruningTemplates\SiteTreeVersioningTemplate;
 
 class RunForOneObject
@@ -142,6 +141,7 @@ class RunForOneObject
                 $array[$table] = $this->getCountPerTable($table);
             }
         }
+
         if (count($array) && $lastOnly) {
             $lastKey = array_key_last($array);
 
@@ -181,6 +181,7 @@ class RunForOneObject
 
             return 0;
         }
+
         // reset to reduce size ...
         $this->toDelete = [];
 
@@ -202,6 +203,7 @@ class RunForOneObject
                 $totalRows = DB::query($selectToBeDeletedSQL)->value();
                 DB::alteration_message('... ... ... Number of rows for current object in ' . $table . ': ' . $totalRows);
             }
+
             if (count($this->toDelete[$this->getUniqueKey()]) > 0) {
                 if (true === $this->dryRun) {
                     $selectToBeDeletedSQL = '
@@ -233,6 +235,7 @@ class RunForOneObject
                     }
                 }
             }
+
             $this->addCountRegister($table, $overallCount);
         }
 
@@ -283,6 +286,7 @@ class RunForOneObject
 
                 continue;
             }
+
             if (is_array($runnerClassNameWithOptions)) {
                 foreach ($runnerClassNameWithOptions as $runnerClassName => $options) {
                     if ('skip' === $options) {
@@ -408,6 +412,7 @@ class RunForOneObject
         if (! $className) {
             $className = $this->object->ClassName;
         }
+
         if (empty($this->tablesPerClassName[$className])) {
             // $classTables = []
             // $allClasses = ClassInfo::subclassesFor($this->object->ClassName, true);
@@ -418,8 +423,7 @@ class RunForOneObject
             // }
             // $this->tablesPerClassName[$this->object->ClassName] = array_unique($classTables);
             $id = $this->object->ID ?? 0;
-            $srcQuery = DataList::create($className)
-                ->filter('ID', intval($id))
+            $srcQuery = DataList::create($className)->filter(['ID' => intval($id)])
                 ->dataQuery()
                 ->query()
             ;

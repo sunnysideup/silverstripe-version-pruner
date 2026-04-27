@@ -10,31 +10,35 @@ use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DB;
 use SilverStripe\Versioned\Versioned;
 use Sunnysideup\VersionPruner\Api\RunForOneObject;
+use SilverStripe\PolyExecution\PolyOutput;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
 
 class PruneAllVersionedRecordsReviewTemplates extends BuildTask
 {
     /**
      * @var string
      */
-    protected $title = 'Prune all versioned records - review templates for each dataobject';
+    protected static string $commandName = 'prune-all-versioned-records-review-templates';
 
-    protected $description = 'Go through all dataobjects and shows the pruning schedule.';
+    /**
+     * @var string
+     */
+    protected string $title = 'Prune all versioned records - review templates for each dataobject';
+
+    /**
+     * @var string
+     */
+    protected static string $description = 'Go through all dataobjects and shows the pruning schedule.';
 
     protected $objectCountPerClassNameCache = [];
 
     protected $objectCountForVersionsPerClassNameCache = [];
 
     /**
-     * @var string
-     */
-    private static $segment = 'prune-all-versioned-records-review-templates';
-
-    /**
      * Prune all published DataObjects which are published according to config.
-     *
-     * @param mixed $request
      */
-    public function run($request)
+    protected function execute(InputInterface $input, PolyOutput $output): int
     {
         $allClasses = ClassInfo::subclassesFor(DataObject::class, false);
         $runner = RunForOneObject::inst();
@@ -47,24 +51,27 @@ class PruneAllVersionedRecordsReviewTemplates extends BuildTask
                 if ($object) {
                     $array = $runner->getTemplatesDescription($object);
                     if (count($array) > 0) {
-                        DB::alteration_message($name . ' (' . $count . ' records) ' . $className);
-                        DB::alteration_message('... ' . $className);
+                        $output->writeln($name . ' (' . $count . ' records) ' . $className);
+                        $output->writeln('... ' . $className);
                         foreach ($array as $string) {
-                            DB::alteration_message('... ... ' . $string);
+                            $output->writeln('... ... ' . $string);
                         }
                     }
-                    // DB::alteration_message('No data for: '.$className);
+
+                    // No data for this className - commented out for clarity
 
                     $array = $runner->getTableSizes($object, true);
                     if (! empty($array)) {
-                        DB::alteration_message('... Version Records');
+                        $output->writeln('... Version Records');
                         foreach ($array as $table => $size) {
-                            DB::alteration_message('... ... ' . $table . ': ' . number_format($size));
+                            $output->writeln('... ... ' . $table . ': ' . number_format($size));
                         }
                     }
                 }
             }
         }
+
+        return Command::SUCCESS;
     }
 
     protected function getObjectCountPerClassName(string $className): int

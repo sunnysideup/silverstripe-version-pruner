@@ -2,36 +2,22 @@
 
 namespace Sunnysideup\VersionPruner;
 
-use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\Queries\SQLSelect;
 
 abstract class PruningTemplatesTemplate
 {
-    /**
-     * @var int
-     */
-    private const DEFAULT_ALWAYS_KEEP = 12;
+    private const int DEFAULT_ALWAYS_KEEP = 12;
 
-    /**
-     * @var int
-     */
-    private const DEFAULT_MAX_DELETE_IN_ONE_GO = 1000;
+    private const int DEFAULT_MAX_DELETE_IN_ONE_GO = 1000;
 
     /**
      * @var string[]
      */
-    private const BASE_FIELDS = [
+    private const array BASE_FIELDS = [
         'ID',
         'Version',
         'LastEdited',
     ];
-
-    /**
-     * Versioned DataObject.
-     *
-     * @var DataObject
-     */
-    protected $object;
 
     /**
      * the table that contains the fields like Version and ClassName
@@ -51,9 +37,11 @@ abstract class PruningTemplatesTemplate
     /**
      * @param mixed $object
      */
-    public function __construct($object, array $toDelete)
+    public function __construct(/**
+     * Versioned DataObject.
+     */
+    protected $object, array $toDelete)
     {
-        $this->object = $object;
         $this->toDelete[$this->getUniqueKey()] = $toDelete;
         $this->baseTable = $this->object->baseTable();
     }
