@@ -47,7 +47,7 @@ class PruneAllVersionedRecordsReviewTemplates extends BuildTask
             $name = Injector::inst()->get($className)->i18n_singular_name();
             $count = $this->getObjectCountPerClassName($className);
             if ($count !== 0) {
-                $object = DataObject::get_one($className);
+                $object = $className::get()->setUseCache(true)->first();
                 if ($object) {
                     $array = $runner->getTemplatesDescription($object);
                     if (count($array) > 0) {
