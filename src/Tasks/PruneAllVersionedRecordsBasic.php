@@ -2,7 +2,6 @@
 
 namespace Sunnysideup\VersionPruner\Tasks;
 
-use Override;
 use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Dev\BuildTask;

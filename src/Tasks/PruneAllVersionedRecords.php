@@ -2,6 +2,7 @@
 
 namespace Sunnysideup\VersionPruner\Tasks;
 
+use Override;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Dev\BuildTask;
 use SilverStripe\ORM\DataList;
@@ -47,6 +48,7 @@ class PruneAllVersionedRecords extends BuildTask
     /**
      * Get CLI options for this task
      */
+    #[Override]
     public function getOptions(): array
     {
         return [
@@ -83,7 +85,7 @@ class PruneAllVersionedRecords extends BuildTask
     protected function execute(InputInterface $input, PolyOutput $output): int
     {
         $classes = $this->getAllVersionedDataClasses();
-        
+
         if ($input->getOption('verbose')) {
             $this->verbose = true;
         }
@@ -135,6 +137,7 @@ class PruneAllVersionedRecords extends BuildTask
         $output->writeln('-------------------- ');
         $output->writeln('Completed, pruned ' . $totalTotalDeleted . ' version records');
         $output->writeln('-------------------- ');
+
         $array = $runObject->getCountRegister();
         foreach ($array as $table => $count) {
             $output->writeln('... ' . $table . ' has ' . $count . ' version records left.');
