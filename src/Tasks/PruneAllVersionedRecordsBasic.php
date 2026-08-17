@@ -14,7 +14,7 @@ class PruneAllVersionedRecordsBasic extends BuildTask
      * Number of RecordIDs to process per batch.
      * @var int
      */
-    private static $batch_size = 10000;
+    private static $batch_size = 1000;
 
     /**
      * Maximum number of batches to run per table per execution.
@@ -74,9 +74,9 @@ class PruneAllVersionedRecordsBasic extends BuildTask
      */
     public function run($request)
     {
-        $batchSize = (int) $this->Config()->get('batch_size');
-        $maxBatches = (int) $this->Config()->get('max_batches');
-        $keepVersions = (int) $this->Config()->get('keep_versions');
+        $batchSize = (int) $this->config()->get('batch_size');
+        $maxBatches = (int) $this->config()->get('max_batches');
+        $keepVersions = (int) $this->config()->get('keep_versions');
 
         if ($request && $request->requestVar('batch_size')) {
             $batchSize = (int) $request->requestVar('batch_size');
@@ -94,7 +94,7 @@ class PruneAllVersionedRecordsBasic extends BuildTask
             $keepVersions = 1;
         }
 
-        $beforeDate = date('Y-m-d', strtotime($this->Config()->get('delete_older_than_strtotime_phrase')));
+        $beforeDate = date('Y-m-d H:i:s', strtotime($this->config()->get('delete_older_than_strtotime_phrase')));
 
         DB::alteration_message("Settings: batch_size={$batchSize}, max_batches={$maxBatches}, keep_versions={$keepVersions}", 'created');
         DB::alteration_message("Keeping last {$keepVersions} versions per record; of the rest, deleting versions older than {$beforeDate}", 'created');
@@ -175,7 +175,7 @@ class PruneAllVersionedRecordsBasic extends BuildTask
     {
         $schema = DataObject::getSchema();
         $tables = DB::table_list(); // keyed by lowercase table name
-        $excluded = (array) $this->Config()->get('exclude_base_classes');
+        $excluded = (array) $this->config()->get('exclude_base_classes');
         $excludedLower = array_map('strtolower', $excluded);
 
         // Collect distinct versioned base classes.
@@ -371,6 +371,9 @@ class PruneAllVersionedRecordsBasic extends BuildTask
 
             DB::alteration_message("    Batch {$batchCount}: Deleted {$deleted} versions for RecordIDs {$recordIds[0]}-{$lastRecordId} (total: {$totalDeleted})");
 
+            // Free per-batch arrays before the next iteration to keep peak memory low.
+            unset($idsToDelete, $recordIds);
+
             if (function_exists('flush')) {
                 flush();
             }
@@ -498,6 +501,9 @@ class PruneAllVersionedRecordsBasic extends BuildTask
             $batchCount++;
             DB::alteration_message("    Batch {$batchCount}: Deleted " . count($orphans) . " orphans for RecordIDs {$recordIds[0]}-{$lastRecordId} (total: {$totalDeleted})");
 
+            // Free per-batch arrays before the next iteration to keep peak memory low.
+            unset($orphans, $subclassCombos, $validCombos, $recordIds);
+
             if (function_exists('flush')) {
                 flush();
             }
@@ -511,11 +517,11 @@ class PruneAllVersionedRecordsBasic extends BuildTask
      */
     public function getDescription()
     {
-        $batchSize = $this->Config()->get('batch_size');
-        $maxBatches = $this->Config()->get('max_batches');
-        $keepVersions = $this->Config()->get('keep_versions');
-        $phrase = $this->Config()->get('delete_older_than_strtotime_phrase');
-        $excluded = (array) $this->Config()->get('exclude_base_classes');
+        $batchSize = $this->config()->get('batch_size');
+        $maxBatches = $this->config()->get('max_batches');
+        $keepVersions = $this->config()->get('keep_versions');
+        $phrase = $this->config()->get('delete_older_than_strtotime_phrase');
+        $excluded = (array) $this->config()->get('exclude_base_classes');
         $excludedList = $excluded ? implode(', ', $excluded) : '(none)';
 
         return "
