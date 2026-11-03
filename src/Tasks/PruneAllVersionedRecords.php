@@ -2,6 +2,7 @@
 
 namespace Sunnysideup\VersionPruner\Tasks;
 
+use SilverStripe\Control\Director;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Dev\BuildTask;
@@ -76,7 +77,17 @@ class PruneAllVersionedRecords extends BuildTask
         }
 
         if ($request && $request->requestVar('limit')) {
-            $this->limit = $request->requestVar('limit');
+            // goes straight into SQL (LIMIT): has to be a whole number.
+            $this->limit = max(1, (int) $request->requestVar('limit'));
+        }
+
+        // a dry run only reports; a real run deletes version records.
+        if ($request && ! $this->dryRun) {
+            if (! Director::is_cli()) {
+                echo 'This task can only be run on the command line.';
+
+                return;
+            }
         }
 
         DB::alteration_message('Pruning all DataObjects with a maximum of ' . self::MAX_ITEMS_PER_CLASS . ' per class.');

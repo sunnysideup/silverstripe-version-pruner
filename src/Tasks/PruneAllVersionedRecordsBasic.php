@@ -2,6 +2,7 @@
 
 namespace Sunnysideup\VersionPruner\Tasks;
 
+use SilverStripe\Control\Director;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Dev\BuildTask;
 use SilverStripe\ORM\DataObject;
@@ -74,6 +75,14 @@ class PruneAllVersionedRecordsBasic extends BuildTask
      */
     public function run($request)
     {
+        if ($request) {
+            if (! Director::is_cli()) {
+                echo 'This task can only be run on the command line.';
+
+                return;
+            }
+        }
+
         $batchSize = (int) $this->config()->get('batch_size');
         $maxBatches = (int) $this->config()->get('max_batches');
         $keepVersions = (int) $this->config()->get('keep_versions');
