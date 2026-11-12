@@ -3,6 +3,7 @@
 namespace Sunnysideup\VersionPruner\Tasks;
 
 use Override;
+use SilverStripe\Control\Director;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Dev\BuildTask;
 use SilverStripe\ORM\DataList;
@@ -52,7 +53,6 @@ class PruneAllVersionedRecords extends BuildTask
     public function getOptions(): array
     {
         return [
-            new InputOption('verbose', 'v', InputOption::VALUE_NONE, 'Enable verbose output'),
             new InputOption('dry', 'd', InputOption::VALUE_NONE, 'Perform a dry run without deleting records'),
             new InputOption('limit', 'l', InputOption::VALUE_REQUIRED, 'Limit per class', self::MAX_ITEMS_PER_CLASS),
         ];
@@ -86,7 +86,8 @@ class PruneAllVersionedRecords extends BuildTask
     {
         $classes = $this->getAllVersionedDataClasses();
 
-        if ($input->getOption('verbose')) {
+        // use sake's own --verbose / -v
+        if ($output->isVerbose()) {
             $this->verbose = true;
         }
 
@@ -95,7 +96,15 @@ class PruneAllVersionedRecords extends BuildTask
         }
 
         if ($input->getOption('limit')) {
-            $this->limit = (int) $input->getOption('limit');
+            // goes straight into SQL (LIMIT): has to be a whole number.
+            $this->limit = max(1, (int) $input->getOption('limit'));
+        }
+
+        // a dry run only reports; a real run deletes version records.
+        if (! $this->dryRun && ! Director::is_cli()) {
+            $output->writeln('This task can only be run on the command line (a dry run can be done in the browser).');
+
+            return Command::FAILURE;
         }
 
         $output->writeln('Pruning all DataObjects with a maximum of ' . self::MAX_ITEMS_PER_CLASS . ' per class.');
@@ -152,11 +161,11 @@ class PruneAllVersionedRecords extends BuildTask
         $sql = '
             SELECT COUNT("ID") AS C, "RecordID"
             FROM "' . $rootTable . '_Versions"
-            WHERE ClassName = \'' . addslashes($className) . '\'
+            WHERE ClassName = ?
             GROUP BY "RecordID"
             ORDER BY C DESC
-            LIMIT ' . $this->limit . ';';
-        $rows = DB::query($sql);
+            LIMIT ' . (int) $this->limit . ';';
+        $rows = DB::prepared_query($sql, [$className]);
         $array = [-1 => 0];
         foreach ($rows as $row) {
             $array[] = $row['RecordID'];
